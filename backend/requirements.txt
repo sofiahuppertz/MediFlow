@@ -10,8 +10,10 @@ httptools==0.6.4
 httpx==0.28.1
 idna==3.10
 Jinja2==3.1.5
+joblib
 markdown-it-py==3.0.0
 mdurl==0.1.2
+pandas
 pydantic==2.10.6
 pydantic_core==2.27.2
 Pygments==2.19.1
@@ -20,6 +22,7 @@ python-multipart==0.0.20
 PyYAML==6.0.2
 rich==13.9.4
 rich-toolkit==0.13.2
+scikit-learn
 shellingham==1.5.4
 sniffio==1.3.1
 sqladmin==0.20.1

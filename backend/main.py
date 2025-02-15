@@ -6,6 +6,7 @@ from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from models import Medicament, Patient, Staff, Surgery, Timesheet
 from sqlmodel import Session, select
+from functions.inference_code import Inference
 import json
 
 SessionDep = Annotated[Session, Depends(get_session)]
@@ -70,6 +71,13 @@ def add_surgery(surgery: dict):
     surgeries.append(surgery)
     save_surgeries(surgeries)
     return surgeries
+
+@app.get("/delay_prediction")
+def inference_model():
+    print("Call inference_model")
+    inference = Inference()
+    prediction = inference.main({})
+    return prediction
 
 @app.websocket("/items/{item_id}/ws")
 async def websocket_endpoint():
