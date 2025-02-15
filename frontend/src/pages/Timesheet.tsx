@@ -1,16 +1,15 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { ChevronLeft, AlertTriangle } from "lucide-react";
-import { timeToMinutes } from "@/utils/timeUtils";
-import DelayDialog from "@/components/Timesheet/DelayDialog";
 import EmergencyDialog from "@/components/Timesheet/EmergencyDialog";
-import SurgeryRoomDropdown from "@/components/Timesheet/SurgeryRoomDropdown";
 import SurgeryBlock from "@/components/Timesheet/SurgeryBlock";
+import SurgeryRoomDropdown from "@/components/Timesheet/SurgeryRoomDropdown";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
 import { Surgery } from "@/types/Surgery";
-import { Dialog, DialogTrigger } from "@/components/ui/dialog";
+import { timeToMinutes } from "@/utils/timeUtils";
+import { AlertTriangle, ChevronLeft } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 // Sample surgeries array (could also be moved to a separate file)
 const mockSurgeries: Surgery[] = [
@@ -60,6 +59,55 @@ const Timesheet = () => {
   const { toast } = useToast();
   const [showEmergencyDialog, setShowEmergencyDialog] = useState(false);
   const [surgeries, setSurgeries] = useState<Surgery[]>(mockSurgeries);
+  const socketRef = useRef<WebSocket | null>(null);
+
+  useEffect(() => {
+    socketRef.current = new WebSocket("ws://localhost:8000/ws");
+    const socket = socketRef.current;
+
+    socket.onopen = () => {
+      console.log("WebSocket connection established");
+    };
+
+    socket.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      console.log("Message from server:", data);
+      // Handle incoming data
+    };
+
+    socket.onclose = () => {
+      console.log("WebSocket connection closed");
+    };
+
+    socket.onerror = (error) => {
+      console.error("WebSocket error:", error);
+    };
+
+    return () => {
+      socket.close();
+    };
+  }, []);
+
+  const handleEmergencySurgery = (newSurgery: Omit<Surgery, "id">) => {
+    const surgeryToAdd: Surgery = {
+      ...newSurgery,
+      id: `emergency-${Date.now()}`,
+    };
+
+    setSurgeries((prev) => [...prev, surgeryToAdd]);
+    toast({
+      title: "Emergency Surgery Added",
+      description: "All relevant personnel have been notified.",
+      variant: "destructive",
+    });
+
+    // Send a message to the WebSocket server
+    if (socketRef.current) {
+      socketRef.current.send(JSON.stringify({ type: "emergency_surgery", data: surgeryToAdd }));
+    }
+
+    setShowEmergencyDialog(false);
+  };
 
   const today = new Date();
   const formattedDate = today.toLocaleDateString("en-GB", {
@@ -84,21 +132,6 @@ const Timesheet = () => {
   if (nowMinutes >= startMinutes && nowMinutes <= endMinutes) {
     currentOffset = ((nowMinutes - startMinutes) / 60) * hourHeight;
   }
-
-  const handleEmergencySurgery = (newSurgery: Omit<Surgery, "id">) => {
-    const surgeryToAdd: Surgery = {
-      ...newSurgery,
-      id: `emergency-${Date.now()}`,
-    };
-
-    setSurgeries((prev) => [...prev, surgeryToAdd]);
-    toast({
-      title: "Emergency Surgery Added",
-      description: "All relevant personnel have been notified.",
-      variant: "destructive",
-    });
-    setShowEmergencyDialog(false);
-  };
 
   return (
     <div className="layout-container max-w-4xl mx-auto">
@@ -162,6 +195,7 @@ const Timesheet = () => {
             surgery={surgery}
             scheduleStart={scheduleStart}
             hourHeight={hourHeight}
+            socket={socketRef.current}
           />
         ))}
       </Card>
