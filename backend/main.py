@@ -1,10 +1,10 @@
 from typing import Annotated, List
 
-from admin import setup_admin
+# from admin import setup_admin
 from database import create_db_and_tables, get_session
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from models import Medicament, Patient, Staff, Surgery, Timesheet
+from models import Drug, Patient, Staff, Surgery, Timesheet
 from sqlmodel import Session, select
 
 SessionDep = Annotated[Session, Depends(get_session)]
@@ -22,7 +22,7 @@ app.add_middleware(
 @app.on_event("startup")
 async def on_startup():
   create_db_and_tables()
-  setup_admin(app)
+  # setup_admin(app)
 
 @app.get("/")
 def read_root():
