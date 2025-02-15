@@ -80,10 +80,10 @@ const Timesheet = () => {
   // Current time indicator calculation
   const now = new Date();
   const nowMinutes = now.getHours() * 60 + now.getMinutes();
-  let currentOffset = -1;
-  if (nowMinutes >= startMinutes && nowMinutes <= endMinutes) {
-    currentOffset = ((nowMinutes - startMinutes) / 60) * hourHeight;
-  }
+  const currentOffset: number = 450;
+  // if (nowMinutes >= startMinutes && nowMinutes <= endMinutes) {
+  //   currentOffset = ((nowMinutes - startMinutes) / 60) * hourHeight;
+  // }
 
   const handleEmergencySurgery = (newSurgery: Omit<Surgery, "id">) => {
     const surgeryToAdd: Surgery = {
@@ -162,6 +162,7 @@ const Timesheet = () => {
             surgery={surgery}
             scheduleStart={scheduleStart}
             hourHeight={hourHeight}
+            currentOffset={currentOffset}
           />
         ))}
       </Card>

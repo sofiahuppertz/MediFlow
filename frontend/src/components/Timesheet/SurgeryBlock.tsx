@@ -8,13 +8,21 @@ import DelayDialog from "./DelayDialog";
 import { useToast } from "@/components/ui/use-toast";
 import { useNavigate } from "react-router-dom";
 
+// const getTimeTypeEmoji = (dynamicStatus: string): string => {
+//   if (dynamicStatus === "scheduled") return "🚧";
+//   if (dynamicStatus === "estimated") return "🕒";
+//   if (dynamicStatus === "dynamic") return "⚡️";
+//   return "";
+// };
+
 interface SurgeryBlockProps {
   surgery: Surgery;
   scheduleStart: string;
   hourHeight: number;
+  currentOffset: number;
 }
 
-const SurgeryBlock = ({ surgery, scheduleStart, hourHeight }: SurgeryBlockProps) => {
+const SurgeryBlock = ({ surgery, scheduleStart, hourHeight, currentOffset }: SurgeryBlockProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -25,7 +33,16 @@ const SurgeryBlock = ({ surgery, scheduleStart, hourHeight }: SurgeryBlockProps)
   const delayHeight = (delayMins / 60) * hourHeight;
   const startMinutes = timeToMinutes(scheduleStart);
   const topOffset = ((surgeryStartMins - startMinutes) / 60) * hourHeight;
+  const bottomOffset = topOffset + baseHeight;
   const totalDuration = (surgeryEndMins - surgeryStartMins) + delayMins;
+
+  let dynamicStatus = "scheduled";
+
+  if (currentOffset >= topOffset && currentOffset <= bottomOffset) {
+    dynamicStatus = "in-progress";
+  } else if (currentOffset > bottomOffset) {
+    dynamicStatus = "completed";
+  }
 
   const statusColors = {
     scheduled: "bg-blue-100 text-blue-800 border-blue-200",
@@ -54,13 +71,13 @@ const SurgeryBlock = ({ surgery, scheduleStart, hourHeight }: SurgeryBlockProps)
         left: 80,
         width: "calc(100% - 80px)",
         height: baseHeight + delayHeight,
-        zIndex: 3,
+        zIndex: 0,
       }}
     >
       <div
         className={cn(
           "rounded-t-lg px-4 py-3 relative",
-          statusColors[surgery.status],
+          statusColors[dynamicStatus],
           timeTypeStyles[surgery.timeType]
         )}
         style={{ height: baseHeight }}
