@@ -11,9 +11,10 @@ interface DelayDialogProps {
   surgery: Surgery;
   onDelaySubmit: (id: string, delayMinutes: number, reason: string) => void;
   onClose: () => void; // Function to close the dialog
+  socket: WebSocket;
 }
 
-const DelayDialog = ({ surgery, onDelaySubmit, onClose }: DelayDialogProps) => {
+const DelayDialog = ({ surgery, onDelaySubmit, onClose, socket }: DelayDialogProps) => {
   const [delayMinutes, setDelayMinutes] = useState(15);
   const [reason, setReason] = useState("");
   const { toast } = useToast();
@@ -28,6 +29,13 @@ const DelayDialog = ({ surgery, onDelaySubmit, onClose }: DelayDialogProps) => {
       return;
     }
     onDelaySubmit(surgery.id, delayMinutes, reason);
+    socket.send(
+      JSON.stringify({
+        surgeryId: surgery.id,
+        delayMinutes,
+        reason,
+      })
+    );
     onClose(); // Close the dialog after submitting
   };
 

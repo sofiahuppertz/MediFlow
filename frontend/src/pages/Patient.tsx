@@ -1,24 +1,24 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import {
-  ChevronLeft,
-  Clock,
-  Info,
-  History,
-  AlertTriangle,
-  ScrollText,
-  UtensilsCrossed,
-} from "lucide-react";
+import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import axios from "axios";
+import {
+  AlertTriangle,
+  ChevronLeft,
+  Clock,
+  History,
+  Info,
+  ScrollText,
+  UtensilsCrossed,
+} from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const PatientPage = () => {
   const navigate = useNavigate();
   const [patientData, setPatientData] = useState(null);
-
+  const socketRef = useRef<WebSocket | null>(null);
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -31,9 +31,36 @@ const PatientPage = () => {
 
     fetchData();
   }, []);
+
+  useEffect(() => {
+    socketRef.current = new WebSocket("ws://localhost:8000/ws");
+    const socket = socketRef.current;
+
+    socket.onopen = () => {
+      console.log("WebSocket connection established");
+    };
+
+    socket.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      console.log("Message from server:", data);
+      // Handle incoming data
+    };
+
+    socket.onclose = () => {
+      console.log("WebSocket connection closed");
+    };
+
+    socket.onerror = (error) => {
+      console.error("WebSocket error:", error);
+    };
+
+    return () => {
+      socket.close();
+    };
+  }, []);
   
   if (!patientData) return <div>Loading patient data...</div>;
-  console.log(patientData);
+  
   // Calculate time until surgery
   const calculateTimeUntil = () => {
     const surgery = new Date(patientData.surgery.time);
