@@ -77,6 +77,15 @@ const mockSurgeries: Surgery[] = [
     progressStatus: "on-time",
     timeType: "locked",
   },
+  {
+    id: "4",
+    title: "Feet Surgery",
+    startTime: "17:00",
+    endTime: "18:00",
+    status: "scheduled",
+    progressStatus: "on-time",
+    timeType: "locked",
+  },
 ];
 
 const DelayDialog = ({ surgery, onDelaySubmit }: { 
@@ -373,8 +382,8 @@ const TimeSlot = ({ time, surgeries }: { time: string; surgeries: Surgery[] }) =
                     progressStatusColors[surgery.progressStatus]
                   )}
                 >
-                  <Timer className="h-3 w-3" />
-                  {surgery.progressStatus}
+                  <Clock className="h-4 w-4 mr-1" />
+                  <AlertTriangle className="h-3 w-3 absolute -right-1 -top-1 text-yellow-500" />
                 </div>
               </div>
               <Dialog>
@@ -388,7 +397,8 @@ const TimeSlot = ({ time, surgeries }: { time: string; surgeries: Surgery[] }) =
               </Dialog>
             </div>
             <div className="text-sm">
-              {formatDuration(baseDuration)}
+              <Clock className="h-3 w-3 inline-block mr-1" />
+              {formatDuration(totalDuration)}
             </div>
           </div>
           {/* Delay Block */}
@@ -441,6 +451,18 @@ const Timesheet = () => {
       variant: "destructive",
     });
     setShowEmergencyDialog(false);
+  };
+
+  const formatDuration = (duration: number): string => {
+    const hours = Math.floor(duration / 60);
+    const minutes = duration % 60;
+    if (hours > 0 && minutes > 0) {
+      return `${hours}h${minutes}`;
+    }
+    if (hours > 0) {
+      return `${hours}h`;
+    }
+    return `${minutes}min`;
   };
 
   return (
@@ -504,6 +526,16 @@ const Timesheet = () => {
           const delayHeight = (delayMins / 60) * hourHeight;
           const topOffset = ((surgeryStartMins - startMinutes) / 60) * hourHeight;
 
+          const baseDuration = timeToMinutes(surgery.endTime) - timeToMinutes(surgery.startTime);
+          // Optionally, if you want to include delay, you can do:
+          const totalDuration = baseDuration + (surgery.delayDuration || 0);
+        
+          // Calculate how many 15-minute intervals the base surgery occupies.
+          const baseSpan = Math.ceil(baseDuration / 15);
+          // Calculate additional spans if a delay exists.
+          const delaySpan = surgery.delayDuration ? Math.ceil(surgery.delayDuration / 15) : 0;
+          const totalSpan = baseSpan + delaySpan;
+
           // Styling based on surgery properties
           const statusColors = {
             scheduled: "bg-blue-100 text-blue-800 border-blue-200",
@@ -539,7 +571,7 @@ const Timesheet = () => {
                 style={{ height: baseHeight }}
               >
                 <div className="flex items-start justify-between">
-                  <div>
+                  <div className="grid grid-cols-2 gap-4">
                     <Button
                       variant="ghost"
                       className="h-auto p-0 text-left font-medium hover:bg-transparent"
@@ -547,12 +579,15 @@ const Timesheet = () => {
                     >
                       {surgery.title}
                     </Button>
+                    <div className="text-sm">
+                      <Clock className="h-3 w-3 inline-block mr-1" />
+                      {formatDuration(totalDuration)}
+                    </div>
                   </div>
                   <Dialog>
                     <DialogTrigger asChild>
-                      <Button variant="outline" size="sm" className="h-8 border-dashed">
-                        <ArrowLeftRight className="h-4 w-4 mr-1" />
-                        Extend
+                      <Button variant="outline" size="sm" className="h-8 border">
+                        <img src="/svg/delay.svg" alt="Delay Icon" className="w-6 h-6 opacity-75" />                        
                       </Button>
                     </DialogTrigger>
                     <DelayDialog
@@ -566,18 +601,15 @@ const Timesheet = () => {
                     />
                   </Dialog>
                 </div>
-                <div className="text-sm">
-                  {surgery.startTime} - {surgery.endTime}
-                </div>
               </div>
               {/* Delay Block (if any) */}
               {delayMins > 0 && (
                 <div
-                  className="rounded-b-lg px-4 py-2 border-t border-dashed bg-red-100 text-red-700"
+                  className="flex items-center justify-between rounded-b-lg px-4 py-2 border-t border-dashed bg-red-100 text-red-700"
                   style={{ height: delayHeight }}
                 >
-                  <div className="text-sm">Delay: {surgery.delayReason}</div>
-                  <div className="text-sm">+{surgery.delayDuration} minutes</div>
+                  <div className="text-sm font-bold">+{surgery.delayDuration} min Delay</div>
+                  <div className="text-sm">{surgery.delayReason}</div>
                 </div>
               )}
               {/* {surgery.downstreamImpacts && surgery.downstreamImpacts > 0 && (
