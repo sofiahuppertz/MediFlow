@@ -75,7 +75,6 @@ const SurgeryBlock = ({ surgery, scheduleStart, hourHeight, currentOffset, socke
   };
 
 
-  // socket.send(JSON.stringify({ type: "surgery", id: surgery.id }));
 
   const formatDuration = (duration: number): string => {
     const hours = Math.floor(duration / 60);
@@ -135,6 +134,7 @@ const SurgeryBlock = ({ surgery, scheduleStart, hourHeight, currentOffset, socke
                 setDialogOpen(false); // Close dialog after submission
               }}
               onClose={() => setDialogOpen(false)} // Close dialog on cancel
+              socket={socket}
             />
           </Dialog>
         </div>

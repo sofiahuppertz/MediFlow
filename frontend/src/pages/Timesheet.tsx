@@ -61,9 +61,9 @@ const Timesheet = () => {
     });
 
     // Send a message to the WebSocket server
-    if (socketRef.current) {
-      socketRef.current.send(JSON.stringify({ type: "emergency_surgery", data: surgeryToAdd }));
-    }
+    // if (socketRef.current) {
+    //   socketRef.current.send(JSON.stringify({ type: "emergency_surgery", data: surgeryToAdd }));
+    // }
 
     setShowEmergencyDialog(false);
   };

@@ -57,7 +57,6 @@ async def get_patient_data():
             {"id": 3, "action": "Medication schedule updated", "time": "1 day ago"}
         ]
     }
-    print(patient_data)
     return JSONResponse(content=patient_data)
 
 @app.get("/surgeries")
@@ -65,7 +64,7 @@ def read_surgeries():
     return load_surgeries()
 
 def save_surgeries(updated_surgery):
-    print('updated_surgery : ', updated_surgery)
+    # print('updated_surgery : ', updated_surgery)
     # Read the current surgeries from the file
     try:
         with open(SURGERIES_FILE, "r") as file:
@@ -102,17 +101,35 @@ def inference_model():
     prediction = inference.main({})
     return prediction
 
+class ConnectionManager:
+    def __init__(self):
+        self.active_connections: list[WebSocket] = []
+
+    async def connect(self, websocket: WebSocket):
+        await websocket.accept()
+        self.active_connections.append(websocket)
+
+    def disconnect(self, websocket: WebSocket):
+        self.active_connections.remove(websocket)
+
+    async def broadcast(self, message: str):
+        for connection in self.active_connections:
+            await connection.send_text(message)
+
+manager = ConnectionManager()
+ 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
-    print("websocket connected")
-    await websocket.accept()
-    initial_message = {"message": "Hello! This is a websocket server!"}
-    await websocket.send_text(json.dumps(initial_message))
-
+    await manager.connect(websocket)
     try:
+        welcome = {"message": "Hello! This is a websocket server!"}
+        await websocket.send_text(json.dumps(welcome))
         while True:
             data = await websocket.receive_text()
+            print("Received data:", data)
             response = {"message": "Message received", "data": data}
-            await websocket.send_text(json.dumps(response))
+            await manager.broadcast(json.dumps(response))
+            
     except WebSocketDisconnect:
-        print("websocket disconnected")
+        manager.disconnect(websocket)
+        print("WebSocket disconnected")
