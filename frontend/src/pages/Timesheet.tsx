@@ -2,50 +2,17 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, Clock, Timer, ArrowLeftRight, AlertTriangle } from "lucide-react";
-import { cn } from "@/lib/utils";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { ChevronLeft, AlertTriangle } from "lucide-react";
+import { timeToMinutes } from "@/utils/timeUtils";
+import DelayDialog from "@/components/Timesheet/DelayDialog";
+import EmergencyDialog from "@/components/Timesheet/EmergencyDialog";
+import SurgeryRoomDropdown from "@/components/Timesheet/SurgeryRoomDropdown";
+import SurgeryBlock from "@/components/Timesheet/SurgeryBlock";
 import { useToast } from "@/components/ui/use-toast";
+import { Surgery } from "@/types/Surgery";
+import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 
-// --- Utility functions ---
-const timeToMinutes = (time: string): number => {
-  const [hours, minutes] = time.split(":").map(Number);
-  return hours * 60 + minutes;
-};
-
-const minutesToTime = (minutes: number): string => {
-  const hours = Math.floor(minutes / 60);
-  const mins = minutes % 60;
-  return `${hours.toString().padStart(2, "0")}:${mins.toString().padStart(2, "0")}`;
-};
-
-interface Surgery {
-  id: string;
-  title: string;
-  startTime: string;
-  endTime: string;
-  status: "scheduled" | "in-progress" | "completed";
-  progressStatus: "on-time" | "delayed" | "canceled";
-  delayReason?: string;
-  delayDuration?: number;
-  timeType: "locked" | "estimated" | "dynamic";
-  downstreamImpacts?: number;
-}
-
+// Sample surgeries array (could also be moved to a separate file)
 const mockSurgeries: Surgery[] = [
   {
     id: "1",
@@ -88,203 +55,6 @@ const mockSurgeries: Surgery[] = [
   },
 ];
 
-const DelayDialog = ({ surgery, onDelaySubmit }: { 
-  surgery: Surgery, 
-  onDelaySubmit: (id: string, delayMinutes: number, reason: string) => void 
-}) => {
-  const [delayMinutes, setDelayMinutes] = useState(15);
-  const [reason, setReason] = useState("");
-  const { toast } = useToast();
-
-  const handleSubmit = () => {
-    if (!reason) {
-      toast({
-        title: "Error",
-        description: "Please provide a reason for the delay",
-        variant: "destructive",
-      });
-      return;
-    }
-    onDelaySubmit(surgery.id, delayMinutes, reason);
-  };
-
-  const currentEnd = timeToMinutes(surgery.endTime);
-  const newEndTime = minutesToTime(currentEnd + delayMinutes);
-
-  return (
-    <DialogContent className="sm:max-w-[425px]">
-      <DialogHeader>
-        <DialogTitle>Extend Surgery Duration</DialogTitle>
-        <DialogDescription>
-          Update the duration for {surgery.title}
-        </DialogDescription>
-      </DialogHeader>
-      <div className="grid gap-4 py-4">
-        <div className="grid gap-2">
-          <Label htmlFor="delay">Additional Time (minutes)</Label>
-          <Input
-            id="delay"
-            type="number"
-            value={delayMinutes}
-            onChange={(e) => setDelayMinutes(Number(e.target.value))}
-            min={5}
-            step={5}
-          />
-        </div>
-        <div className="grid gap-2">
-          <Label htmlFor="reason">Reason for Extension</Label>
-          <Input
-            id="reason"
-            value={reason}
-            onChange={(e) => setReason(e.target.value)}
-            placeholder="e.g., Equipment setup"
-          />
-        </div>
-        <div className="bg-muted p-3 rounded-md text-sm">
-          <div className="mb-2">Timeline Preview:</div>
-          <div className="text-muted-foreground">
-            Original: {surgery.startTime} - {surgery.endTime}
-          </div>
-          <div className="text-primary">
-            New: {surgery.startTime} - {newEndTime} (+{delayMinutes}m)
-          </div>
-        </div>
-      </div>
-      <div className="flex justify-end space-x-2">
-        <Button variant="outline" onClick={() => {
-          // Close dialog by clicking outside or pressing escape
-        }}>
-          Cancel
-        </Button>
-        <Button onClick={handleSubmit}>
-          Confirm Extension
-        </Button>
-      </div>
-    </DialogContent>
-  );
-};
-
-const EmergencyDialog = ({ onSubmit, onClose }: { 
-  onSubmit: (surgery: Omit<Surgery, 'id'>) => void;
-  onClose: () => void;
-}) => {
-  const [title, setTitle] = useState("");
-  const [startTime, setStartTime] = useState("");
-  const [duration, setDuration] = useState(60);
-  const { toast } = useToast();
-
-  const handleSubmit = () => {
-    if (!title || !startTime) {
-      toast({
-        title: "Error",
-        description: "Please fill in all required fields",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Calculate end time based on start time and duration
-    const startMinutes = timeToMinutes(startTime);
-    const endTime = minutesToTime(startMinutes + duration);
-
-    onSubmit({
-      title,
-      startTime,
-      endTime,
-      status: "scheduled",
-      progressStatus: "on-time",
-      timeType: "dynamic", // Emergency surgeries are dynamic by default
-    });
-    onClose();
-  };
-
-  return (
-    <DialogContent className="sm:max-w-[425px]">
-      <DialogHeader>
-        <DialogTitle>Add Emergency Surgery</DialogTitle>
-        <DialogDescription>
-          Please provide details for the emergency procedure
-        </DialogDescription>
-      </DialogHeader>
-      <div className="grid gap-4 py-4">
-        <div className="grid gap-2">
-          <Label htmlFor="title">Surgery Title</Label>
-          <Input
-            id="title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="Emergency Appendectomy"
-          />
-        </div>
-        <div className="grid gap-2">
-          <Label htmlFor="startTime">Start Time</Label>
-          <Input
-            id="startTime"
-            type="time"
-            value={startTime}
-            onChange={(e) => setStartTime(e.target.value)}
-            min="07:00"
-            max="19:00"
-          />
-        </div>
-        <div className="grid gap-2">
-          <Label htmlFor="duration">Duration (minutes)</Label>
-          <Input
-            id="duration"
-            type="number"
-            value={duration}
-            onChange={(e) => setDuration(Number(e.target.value))}
-            min={15}
-            step={15}
-          />
-        </div>
-        <div className="bg-muted p-3 rounded-md text-sm">
-          <div className="mb-2">Timeline Preview:</div>
-          {startTime && (
-            <div className="text-primary">
-              {startTime} - {minutesToTime(timeToMinutes(startTime) + duration)}
-              {' '}({duration}m)
-            </div>
-          )}
-        </div>
-      </div>
-      <div className="flex justify-end space-x-2">
-        <Button variant="outline" onClick={onClose}>
-          Cancel
-        </Button>
-        <Button variant="destructive" onClick={handleSubmit}>
-          Add Emergency Surgery
-        </Button>
-      </div>
-    </DialogContent>
-  );
-};
-
-function SurgeryRoomDropdown() {
-  const [selectedRoom, setSelectedRoom] = useState("Main OR");
-  const rooms = ["Main OR", "Secondary OR", "Ambulatory OR"];
-
-  return (
-    <div className="mb-4">
-      <Label htmlFor="surgery-room" className="block text-sm font-medium text-muted-foreground">
-        Surgery Room
-      </Label>
-      <select
-        id="surgery-room"
-        value={selectedRoom}
-        onChange={(e) => setSelectedRoom(e.target.value)}
-        className="mt-1 block w-full rounded-md border border-input bg-white px-3 py-2 text-sm shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-      >
-        {rooms.map((room) => (
-          <option key={room} value={room}>
-            {room}
-          </option>
-        ))}
-      </select>
-    </div>
-  );
-}
-
 const Timesheet = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -298,16 +68,16 @@ const Timesheet = () => {
     year: "numeric",
   });
 
-  // Define the schedule start/end and dimensions for the calendar
+  // Calendar configuration
   const scheduleStart = "07:00";
   const scheduleEnd = "19:00";
   const startMinutes = timeToMinutes(scheduleStart);
   const endMinutes = timeToMinutes(scheduleEnd);
   const totalMinutes = endMinutes - startMinutes;
-  const hourHeight = 60; // 60 pixels per hour
+  const hourHeight = 60;
   const calendarHeight = (totalMinutes / 60) * hourHeight;
 
-  // Calculate current time offset for the indicator (only visible if within schedule)
+  // Current time indicator calculation
   const now = new Date();
   const nowMinutes = now.getHours() * 60 + now.getMinutes();
   let currentOffset = -1;
@@ -315,32 +85,19 @@ const Timesheet = () => {
     currentOffset = ((nowMinutes - startMinutes) / 60) * hourHeight;
   }
 
-  const handleEmergencySurgery = (newSurgery: Omit<Surgery, 'id'>) => {
+  const handleEmergencySurgery = (newSurgery: Omit<Surgery, "id">) => {
     const surgeryToAdd: Surgery = {
       ...newSurgery,
-      id: `emergency-${Date.now()}`, // Generate a unique ID
+      id: `emergency-${Date.now()}`,
     };
 
     setSurgeries((prev) => [...prev, surgeryToAdd]);
-    
     toast({
       title: "Emergency Surgery Added",
       description: "All relevant personnel have been notified.",
       variant: "destructive",
     });
     setShowEmergencyDialog(false);
-  };
-
-  const formatDuration = (duration: number): string => {
-    const hours = Math.floor(duration / 60);
-    const minutes = duration % 60;
-    if (hours > 0 && minutes > 0) {
-      return `${hours}h${minutes}`;
-    }
-    if (hours > 0) {
-      return `${hours}h`;
-    }
-    return `${minutes}min`;
   };
 
   return (
@@ -358,12 +115,12 @@ const Timesheet = () => {
 
       <SurgeryRoomDropdown />
 
-      {/* Calendar Container */}
       <Card className="p-6 relative" style={{ height: calendarHeight }}>
-        {/* Hour Grid: Only hours are displayed */}
+        {/* Hour Grid */}
         {Array.from({ length: totalMinutes / 60 + 1 }, (_, i) => {
-          const hourLabel =
-            (i + timeToMinutes(scheduleStart) / 60).toString().padStart(2, "0") + ":00";
+          const hourLabel = `${(i + timeToMinutes(scheduleStart) / 60)
+            .toString()
+            .padStart(2, "0")}:00`;
           return (
             <div
               key={i}
@@ -375,7 +132,6 @@ const Timesheet = () => {
                 borderTop: "1px solid #e5e7eb",
               }}
             >
-              {/* On mobile, use relative positioning with a left margin; on larger screens, use absolute positioning */}
               <span className="relative sm:absolute sm:-left-20 sm:ml-0 ml-2 text-sm text-gray-500">
                 {hourLabel}
               </span>
@@ -383,7 +139,7 @@ const Timesheet = () => {
           );
         })}
 
-        {/* Current Time Diagonal Indicator */}
+        {/* Current Time Indicator */}
         {currentOffset >= 0 && (
           <div
             style={{
@@ -400,111 +156,14 @@ const Timesheet = () => {
         )}
 
         {/* Surgery Blocks */}
-        {surgeries.map((surgery) => {
-          // Calculate the vertical position and height based on start time, end time, and delay
-          const surgeryStartMins = timeToMinutes(surgery.startTime);
-          const surgeryEndMins = timeToMinutes(surgery.endTime);
-          const delayMins = surgery.delayDuration || 0;
-          const baseHeight = ((surgeryEndMins - surgeryStartMins) / 60) * hourHeight;
-          const delayHeight = (delayMins / 60) * hourHeight;
-          const topOffset = ((surgeryStartMins - startMinutes) / 60) * hourHeight;
-
-          const baseDuration = timeToMinutes(surgery.endTime) - timeToMinutes(surgery.startTime);
-          // Optionally, if you want to include delay, you can do:
-          const totalDuration = baseDuration + (surgery.delayDuration || 0);
-        
-          // Calculate how many 15-minute intervals the base surgery occupies.
-          const baseSpan = Math.ceil(baseDuration / 15);
-          // Calculate additional spans if a delay exists.
-          const delaySpan = surgery.delayDuration ? Math.ceil(surgery.delayDuration / 15) : 0;
-          const totalSpan = baseSpan + delaySpan;
-
-          // Styling based on surgery properties
-          const statusColors = {
-            scheduled: "bg-blue-100 text-blue-800 border-blue-200",
-            "in-progress": "bg-yellow-100 text-yellow-800 border-yellow-200",
-            completed: "bg-green-100 text-green-800 border-green-200",
-          };
-
-          const timeTypeStyles = {
-            locked: "border-2",
-            estimated: "border border-dashed",
-            dynamic: "border border-dotted",
-          };
-
-          return (
-            <div
-              key={surgery.id}
-              style={{
-                position: "absolute",
-                top: topOffset,
-                left: 80, // Leave space for hour labels
-                width: "calc(100% - 80px)",
-                height: baseHeight + delayHeight,
-                zIndex: 3,
-              }}
-            >
-              {/* Base Surgery Block */}
-              <div
-                className={cn(
-                  "rounded-t-lg px-4 py-3 relative",
-                  statusColors[surgery.status],
-                  timeTypeStyles[surgery.timeType]
-                )}
-                style={{ height: baseHeight }}
-              >
-                <div className="flex items-start justify-between">
-                  <div className="grid grid-cols-2 gap-4">
-                    <Button
-                      variant="ghost"
-                      className="h-auto p-0 text-left font-medium hover:bg-transparent"
-                      onClick={() => navigate(`/surgery/${surgery.id}`)}
-                    >
-                      {surgery.title}
-                    </Button>
-                    <div className="text-sm">
-                      <Clock className="h-3 w-3 inline-block mr-1" />
-                      {formatDuration(totalDuration)}
-                    </div>
-                  </div>
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <Button variant="outline" size="sm" className="h-8 border">
-                        <img src="/svg/delay.svg" alt="Delay Icon" className="w-6 h-6 opacity-75" />                        
-                      </Button>
-                    </DialogTrigger>
-                    <DelayDialog
-                      surgery={surgery}
-                      onDelaySubmit={(id, delay, reason) => {
-                        toast({
-                          title: "Surgery Extended",
-                          description: `${surgery.title} extended by ${delay} minutes`,
-                        });
-                      }}
-                    />
-                  </Dialog>
-                </div>
-              </div>
-              {/* Delay Block (if any) */}
-              {delayMins > 0 && (
-                <div
-                  className="flex items-center justify-between rounded-b-lg px-4 py-2 border-t border-dashed bg-red-100 text-red-700"
-                  style={{ height: delayHeight }}
-                >
-                  <div className="text-sm font-bold">+{surgery.delayDuration} min Delay</div>
-                  <div className="text-sm">{surgery.delayReason}</div>
-                </div>
-              )}
-              {/* {surgery.downstreamImpacts && surgery.downstreamImpacts > 0 && (
-                <div className="mt-1 inline-flex items-center gap-1 text-sm text-red-600 bg-red-50 px-2 py-1 rounded">
-                  <AlertTriangle className="h-3 w-3" />
-                  Affects {surgery.downstreamImpacts} later{" "}
-                  {surgery.downstreamImpacts === 1 ? "surgery" : "surgeries"}
-                </div>
-              )} */}
-            </div>
-          );
-        })}
+        {surgeries.map((surgery) => (
+          <SurgeryBlock
+            key={surgery.id}
+            surgery={surgery}
+            scheduleStart={scheduleStart}
+            hourHeight={hourHeight}
+          />
+        ))}
       </Card>
 
       {/* Emergency Surgery Button */}
@@ -516,7 +175,10 @@ const Timesheet = () => {
               Emergency
             </Button>
           </DialogTrigger>
-          <EmergencyDialog onSubmit={handleEmergencySurgery} onClose={() => setShowEmergencyDialog(false)} />
+          <EmergencyDialog
+            onSubmit={handleEmergencySurgery}
+            onClose={() => setShowEmergencyDialog(false)}
+          />
         </Dialog>
       </div>
     </div>
