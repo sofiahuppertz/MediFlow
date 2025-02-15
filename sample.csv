@@ -1,0 +1,6 @@
+caseid,age,sex,height,weight,bmi,asa,emop,department,optype,approach,position,ane_type,preop_htn,preop_dm,preop_pft,preop_hb,preop_plt,preop_pt,preop_aptt,preop_gluc,preop_alb,preop_ast,preop_alt,preop_bun,preop_cr,duration_operation,duration_anesthesia
+1,77,M,160.2,67.5,26.3,2.0,0,General surgery,Colorectal,Open,Lithotomy,General Anesthesia,1,0,Normal,14.1,189.0,94.0,33.2,134.0,4.3,18.0,16.0,10.0,0.82,2.4166666666666665,3.1666666666666665
+2,54,M,167.3,54.8,19.6,2.0,0,General surgery,Stomach,Open,Supine,General Anesthesia,0,0,Normal,10.2,251.0,110.0,31.9,88.0,3.8,18.0,15.0,14.0,0.86,3.5833333333333335,4.433333333333334
+3,62,M,169.1,69.7,24.4,1.0,0,General surgery,Biliary/Pancreas,Videoscopic,Trendelenburg (Inclined),General Anesthesia,0,0,Normal,14.2,373.0,103.0,30.3,87.0,4.2,17.0,34.0,14.0,1.18,0.5333333333333333,1.3333333333333333
+4,74,M,160.6,53.0,20.5,2.0,0,General surgery,Stomach,Videoscopic,Trendelenburg (Inclined),General Anesthesia,1,0,Normal,14.4,275.0,103.0,34.5,108.0,4.1,23.0,18.0,10.0,0.96,4.25,5.833333333333333
+5,66,M,171.0,59.7,20.4,3.0,1,General surgery,Vascular,Open,Prone,General Anesthesia,1,0,Normal,10.1,67.0,73.0,36.5,126.0,2.6,765.0,77.0,50.0,4.43,4.916666666666667,6.5
