@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,7 @@ import SurgeryBlock from "@/components/Timesheet/SurgeryBlock";
 import { useToast } from "@/components/ui/use-toast";
 import { Surgery } from "@/types/Surgery";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
+import axios from "axios";
 
 // Sample surgeries array (could also be moved to a separate file)
 const mockSurgeries: Surgery[] = [
@@ -85,12 +86,19 @@ const Timesheet = () => {
     currentOffset = ((nowMinutes - startMinutes) / 60) * hourHeight;
   }
 
+  
+  useEffect(() => {
+    axios.get("http://localhost:8000/surgeries")
+      .then((response) => setSurgeries(response.data))
+      .catch((error) => console.error("Error fetching surgeries:", error));
+  }, []);
+
   const handleEmergencySurgery = (newSurgery: Omit<Surgery, "id">) => {
     const surgeryToAdd: Surgery = {
       ...newSurgery,
       id: `emergency-${Date.now()}`,
     };
-
+    updateSurgeries(surgeryToAdd);
     setSurgeries((prev) => [...prev, surgeryToAdd]);
     toast({
       title: "Emergency Surgery Added",
@@ -99,6 +107,22 @@ const Timesheet = () => {
     });
     setShowEmergencyDialog(false);
   };
+
+
+
+  const updateSurgeries = async (newSurgery: Surgery) => {
+    try {
+      const response = await axios.post("http://localhost:8000/surgeries", newSurgery, {
+        headers: { "Content-Type": "application/json" },
+      });
+      console.log('response ')
+      console.log('response : ',response.data )
+      setSurgeries(response.data);
+    } catch (error) {
+      console.error("Error updating surgeries:", error);
+    }
+  };
+
 
   return (
     <div className="layout-container max-w-4xl mx-auto">
@@ -158,11 +182,13 @@ const Timesheet = () => {
         {/* Surgery Blocks */}
         {surgeries.map((surgery) => (
           <SurgeryBlock
-            key={surgery.id}
-            surgery={surgery}
-            scheduleStart={scheduleStart}
-            hourHeight={hourHeight}
-          />
+          key={surgery.id}
+          surgery={surgery}
+          scheduleStart={scheduleStart}
+          hourHeight={hourHeight}
+          setSurgeries={setSurgeries} // Pass setSurgeries as a prop
+        />
+        
         ))}
       </Card>
 

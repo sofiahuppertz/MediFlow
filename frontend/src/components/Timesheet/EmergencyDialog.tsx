@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { addMinutesToTime } from "@/utils/timeUtils";
 import { Surgery } from "@/types/Surgery";
+import axios from "axios";
 
 interface EmergencyDialogProps {
   onSubmit: (surgery: Omit<Surgery, "id">) => void;
@@ -18,7 +19,7 @@ const EmergencyDialog = ({ onSubmit, onClose }: EmergencyDialogProps) => {
   const [duration, setDuration] = useState(60);
   const { toast } = useToast();
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!title || !startTime) {
       toast({
         title: "Error",
@@ -27,17 +28,29 @@ const EmergencyDialog = ({ onSubmit, onClose }: EmergencyDialogProps) => {
       });
       return;
     }
+    console.log('result : ' )
 
     const endTime = addMinutesToTime(startTime, duration);
-
-    onSubmit({
+    const newSurgery: Omit<Surgery, "id"> = {
       title,
       startTime,
       endTime,
       status: "scheduled",
       progressStatus: "on-time",
       timeType: "dynamic",
-    });
+    };
+
+    try {
+      
+      await axios.post("http://localhost:8000/surgeries", newSurgery, {
+        headers: { "Content-Type": "application/json" },
+      });
+      console.log('result : ',newSurgery )
+      onSubmit(newSurgery);
+      window.location.reload();
+    } catch (error) {
+      console.error("Error updating surgeries:", error);
+    }
     onClose();
   };
 
