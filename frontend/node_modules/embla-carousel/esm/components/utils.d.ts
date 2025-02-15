@@ -8,6 +8,7 @@ export declare function mathAbs(n: number): number;
 export declare function mathSign(n: number): number;
 export declare function deltaAbs(valueB: number, valueA: number): number;
 export declare function factorAbs(valueB: number, valueA: number): number;
+export declare function roundToTwoDecimals(num: number): number;
 export declare function arrayKeys<Type>(array: Type[]): number[];
 export declare function arrayLast<Type>(array: Type[]): Type;
 export declare function arrayLastIndex<Type>(array: Type[]): number;
