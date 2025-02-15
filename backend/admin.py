@@ -69,7 +69,7 @@ class SurgeryAdmin(ModelView, model=Surgery):
         Surgery.start_time,
         Surgery.end_time,
         Surgery.status,
-        Surgery.staff_ids,
+        Surgery.staffs,
         Surgery.patient_id,
         Surgery.timesheet_id,
     ]
