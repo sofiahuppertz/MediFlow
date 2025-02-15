@@ -13,25 +13,27 @@ import {
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
+import axios from "axios";
 
 const PatientPage = () => {
   const navigate = useNavigate();
-  const [patientData, setPatientData] = useState<any>(null);
+  const [patientData, setPatientData] = useState(null);
 
   useEffect(() => {
-    // Fetch patient data from the backend
-    fetch("http://localhost:8000/get_patient_data")
-      .then((response) => response.json())
-      .then((data) => {
-        setPatientData(data);
-        console.log("Fetched patient data:", data);
-      })
-      .catch((error) => console.error("Error fetching patient data:", error));
+    const fetchData = async () => {
+      try {
+        const response = await axios.get("http://localhost:8000/get_patient_data");
+        setPatientData(response.data);
+      } catch (error) {
+        console.error("Error fetching patient data:", error);
+      }
+    };
+
+    fetchData();
   }, []);
-
-  // Show a loading state until the data is fetched
+  
   if (!patientData) return <div>Loading patient data...</div>;
-
+  console.log(patientData);
   // Calculate time until surgery
   const calculateTimeUntil = () => {
     const surgery = new Date(patientData.surgery.time);
