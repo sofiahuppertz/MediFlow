@@ -10,9 +10,10 @@ import { Surgery } from "@/types/Surgery";
 interface DelayDialogProps {
   surgery: Surgery;
   onDelaySubmit: (id: string, delayMinutes: number, reason: string) => void;
+  onClose: () => void; // Function to close the dialog
 }
 
-const DelayDialog = ({ surgery, onDelaySubmit }: DelayDialogProps) => {
+const DelayDialog = ({ surgery, onDelaySubmit, onClose }: DelayDialogProps) => {
   const [delayMinutes, setDelayMinutes] = useState(15);
   const [reason, setReason] = useState("");
   const { toast } = useToast();
@@ -27,6 +28,7 @@ const DelayDialog = ({ surgery, onDelaySubmit }: DelayDialogProps) => {
       return;
     }
     onDelaySubmit(surgery.id, delayMinutes, reason);
+    onClose(); // Close the dialog after submitting
   };
 
   const newEndTime = addMinutesToTime(surgery.endTime, delayMinutes);
@@ -71,7 +73,7 @@ const DelayDialog = ({ surgery, onDelaySubmit }: DelayDialogProps) => {
         </div>
       </div>
       <div className="flex justify-end space-x-2">
-        <Button variant="outline" onClick={() => {}}>
+        <Button variant="outline" onClick={onClose}>
           Cancel
         </Button>
         <Button onClick={handleSubmit}>

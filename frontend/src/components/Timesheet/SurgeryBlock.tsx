@@ -7,6 +7,8 @@ import { Surgery } from "@/types/Surgery";
 import DelayDialog from "./DelayDialog";
 import { useToast } from "@/components/ui/use-toast";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { useState } from "react";
 
 // const getTimeTypeEmoji = (dynamicStatus: string): string => {
 //   if (dynamicStatus === "scheduled") return "🚧";
@@ -20,11 +22,13 @@ interface SurgeryBlockProps {
   scheduleStart: string;
   hourHeight: number;
   currentOffset: number;
+  setSurgeries: (surgeries: Surgery[]) => void;
 }
 
-const SurgeryBlock = ({ surgery, scheduleStart, hourHeight, currentOffset }: SurgeryBlockProps) => {
+const SurgeryBlock = ({ surgery, scheduleStart, hourHeight, currentOffset, setSurgeries }: SurgeryBlockProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [isDialogOpen, setDialogOpen] = useState(false);
 
   const surgeryStartMins = timeToMinutes(surgery.startTime);
   const surgeryEndMins = timeToMinutes(surgery.endTime);
@@ -43,6 +47,19 @@ const SurgeryBlock = ({ surgery, scheduleStart, hourHeight, currentOffset }: Sur
   } else if (currentOffset > bottomOffset) {
     dynamicStatus = "completed";
   }
+  
+  const updateSurgeries = async (newSurgery: Surgery) => {
+    try {
+      const response = await axios.post("http://localhost:8000/surgeries", newSurgery, {
+        headers: { "Content-Type": "application/json" },
+      });
+      console.log("Response:", response.data);
+      setSurgeries(response.data);
+
+    } catch (error) {
+      console.error("Error updating surgeries:", error);
+    }
+  };
 
   const statusColors = {
     scheduled: "bg-blue-100 text-blue-800 border-blue-200",
@@ -96,7 +113,7 @@ const SurgeryBlock = ({ surgery, scheduleStart, hourHeight, currentOffset }: Sur
               {formatDuration(totalDuration)}
             </div>
           </div>
-          <Dialog>
+          <Dialog open={isDialogOpen} onOpenChange={setDialogOpen}> {/* Manage dialog open state */}
             <DialogTrigger asChild>
               <Button variant="outline" size="sm" className="h-8 border">
                 <img src="/svg/delay.svg" alt="Delay Icon" className="w-6 h-6 opacity-75" />
@@ -105,11 +122,15 @@ const SurgeryBlock = ({ surgery, scheduleStart, hourHeight, currentOffset }: Sur
             <DelayDialog
               surgery={surgery}
               onDelaySubmit={(id, delay, reason) => {
+                const updatedSurgery = { ...surgery, delayDuration: delay, delayReason: reason };
+                updateSurgeries(updatedSurgery);
                 toast({
                   title: "Surgery Extended",
                   description: `${surgery.title} extended by ${delay} minutes`,
                 });
+                setDialogOpen(false); // Close dialog after submission
               }}
+              onClose={() => setDialogOpen(false)} // Close dialog on cancel
             />
           </Dialog>
         </div>
@@ -128,3 +149,4 @@ const SurgeryBlock = ({ surgery, scheduleStart, hourHeight, currentOffset }: Sur
 };
 
 export default SurgeryBlock;
+

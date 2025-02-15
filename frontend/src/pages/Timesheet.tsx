@@ -1,59 +1,17 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, AlertTriangle } from "lucide-react";
 import { timeToMinutes } from "@/utils/timeUtils";
-import DelayDialog from "@/components/Timesheet/DelayDialog";
 import EmergencyDialog from "@/components/Timesheet/EmergencyDialog";
 import SurgeryRoomDropdown from "@/components/Timesheet/SurgeryRoomDropdown";
 import SurgeryBlock from "@/components/Timesheet/SurgeryBlock";
 import { useToast } from "@/components/ui/use-toast";
 import { Surgery } from "@/types/Surgery";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
-
-// Sample surgeries array (could also be moved to a separate file)
-const mockSurgeries: Surgery[] = [
-  {
-    id: "1",
-    title: "Appendectomy",
-    startTime: "09:00",
-    endTime: "10:30",
-    status: "scheduled",
-    progressStatus: "on-time",
-    timeType: "dynamic",
-  },
-  {
-    id: "2",
-    title: "Hip Replacement",
-    startTime: "11:00",
-    endTime: "13:00",
-    status: "in-progress",
-    progressStatus: "delayed",
-    delayReason: "Equipment setup",
-    delayDuration: 30,
-    timeType: "estimated",
-    downstreamImpacts: 2,
-  },
-  {
-    id: "3",
-    title: "Cardiac Surgery",
-    startTime: "14:00",
-    endTime: "15:00",
-    status: "scheduled",
-    progressStatus: "on-time",
-    timeType: "locked",
-  },
-  {
-    id: "4",
-    title: "Feet Surgery",
-    startTime: "17:00",
-    endTime: "18:00",
-    status: "scheduled",
-    progressStatus: "on-time",
-    timeType: "locked",
-  },
-];
+import axios from "axios";
+import { mockSurgeries } from "@/mocks/surgery_mock";
 
 const Timesheet = () => {
   const navigate = useNavigate();
@@ -85,12 +43,19 @@ const Timesheet = () => {
   //   currentOffset = ((nowMinutes - startMinutes) / 60) * hourHeight;
   // }
 
+  
+  useEffect(() => {
+    axios.get("http://localhost:8000/surgeries")
+      .then((response) => setSurgeries(response.data))
+      .catch((error) => console.error("Error fetching surgeries:", error));
+  }, []);
+
   const handleEmergencySurgery = (newSurgery: Omit<Surgery, "id">) => {
     const surgeryToAdd: Surgery = {
       ...newSurgery,
       id: `emergency-${Date.now()}`,
     };
-
+    updateSurgeries(surgeryToAdd);
     setSurgeries((prev) => [...prev, surgeryToAdd]);
     toast({
       title: "Emergency Surgery Added",
@@ -99,6 +64,22 @@ const Timesheet = () => {
     });
     setShowEmergencyDialog(false);
   };
+
+
+
+  const updateSurgeries = async (newSurgery: Surgery) => {
+    try {
+      const response = await axios.post("http://localhost:8000/surgeries", newSurgery, {
+        headers: { "Content-Type": "application/json" },
+      });
+      console.log('response ')
+      console.log('response : ',response.data )
+      setSurgeries(response.data);
+    } catch (error) {
+      console.error("Error updating surgeries:", error);
+    }
+  };
+
 
   return (
     <div className="layout-container max-w-4xl mx-auto">
@@ -158,12 +139,14 @@ const Timesheet = () => {
         {/* Surgery Blocks */}
         {surgeries.map((surgery) => (
           <SurgeryBlock
-            key={surgery.id}
-            surgery={surgery}
-            scheduleStart={scheduleStart}
-            hourHeight={hourHeight}
-            currentOffset={currentOffset}
-          />
+          key={surgery.id}
+          surgery={surgery}
+          scheduleStart={scheduleStart}
+          hourHeight={hourHeight}
+          currentOffset={currentOffset}
+          setSurgeries={setSurgeries}
+        />
+        
         ))}
       </Card>
 
