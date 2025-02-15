@@ -19,8 +19,8 @@ const PatientPage = () => {
   const [activeTab, setActiveTab] = useState("info");
 
   // Mock data
-  const surgeryTime = "2024-04-15T14:30:00";
-  const stopEatingTime = "2024-04-15T02:30:00"; // 12 hours before surgery
+  const surgeryTime = "2025-02-25T14:30:00";
+  const stopEatingTime = "2025-02-25T02:30:00"; // 12 hours before surgery
   const surgeryStatus = "on-time"; // could be 'on-time', 'delayed', or 'cancelled'
   const latestActions = [
     { id: 1, action: "Pre-surgery consultation completed", time: "2 hours ago" },
@@ -66,14 +66,18 @@ const PatientPage = () => {
 
       <div className="grid gap-6">
         <Card className="p-6 animate-fade-up">
-          <h2 className="text-xl font-medium mb-4">Welcome, John Doe</h2>
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1">
-              <div className="text-sm text-muted-foreground mb-1">
-                Scheduled Surgery
-              </div>
-              <div className="font-medium">Appendectomy</div>
-              <div className="text-sm text-muted-foreground mt-2">
+          {/* Header section for patient info */}
+          <header className="mb-6">
+            <h2 className="text-2xl font-bold text-gray-900">John Doe</h2>
+            <p className="text-sm text-gray-500">Patient Dashboard</p>
+          </header>
+          
+          <div className="grid md:grid-cols-2 gap-6">
+            {/* Surgery Details Section */}
+            <section>
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">Scheduled Surgery</h3>
+              <p className="text-sm text-gray-500 uppercase tracking-wide">Appendectomy</p>
+              <p className="mt-1 text-gray-600">
                 {new Date(surgeryTime).toLocaleDateString("en-US", {
                   weekday: "long",
                   year: "numeric",
@@ -82,53 +86,55 @@ const PatientPage = () => {
                   hour: "2-digit",
                   minute: "2-digit",
                 })}
-              </div>
-            </div>
-            <div className="flex-1 bg-secondary/50 p-4 rounded-lg space-y-3">
-              <div className="flex items-center space-x-2">
-                <Clock className="h-5 w-5 text-muted-foreground" />
+              </p>
+            </section>
+            
+            {/* Surgery Metrics & Status Section */}
+            <aside className="bg-secondary/50 p-4 rounded-lg space-y-4">
+              <div className="flex items-center">
+                <Clock className="h-5 w-5 text-muted-foreground mr-3" />
                 <div>
-                  <div className="text-sm text-muted-foreground">Time until surgery</div>
-                  <div className="font-medium">{calculateTimeUntil()}</div>
+                  <p className="text-xs text-gray-400">Time until surgery</p>
+                  <p className="text-lg font-semibold text-gray-900">{calculateTimeUntil()}</p>
                 </div>
               </div>
               
-              <div className="flex items-center space-x-2">
-                <Info className="h-5 w-5 text-muted-foreground" />
+              <div className="flex items-center">
+                <Info className="h-5 w-5 text-muted-foreground mr-3" />
                 <div>
-                  <div className="text-sm text-muted-foreground">Surgery Time</div>
-                  <div className="font-medium">
+                  <p className="text-xs text-gray-400">Surgery Time</p>
+                  <p className="text-lg font-semibold text-gray-900">
                     {new Date(surgeryTime).toLocaleTimeString("en-US", {
                       hour: "2-digit",
                       minute: "2-digit",
                     })}
-                  </div>
+                  </p>
                 </div>
               </div>
-
-              <div className="flex items-center space-x-2">
-                <UtensilsCrossed className="h-5 w-5 text-muted-foreground" />
+              
+              <div className="flex items-center">
+                <UtensilsCrossed className="h-5 w-5 text-muted-foreground mr-3" />
                 <div>
-                  <div className="text-sm text-muted-foreground">Stop Eating & Drinking</div>
-                  <div className="font-medium">
+                  <p className="text-xs text-gray-400">Stop Eating &amp; Drinking</p>
+                  <p className="text-lg font-semibold text-gray-900">
                     {new Date(stopEatingTime).toLocaleTimeString("en-US", {
                       hour: "2-digit",
                       minute: "2-digit",
                     })}
-                  </div>
+                  </p>
                 </div>
               </div>
-
-              <div className="flex items-center space-x-2">
-                <AlertTriangle className="h-5 w-5 text-muted-foreground" />
+              
+              <div className="flex items-center">
+                <AlertTriangle className="h-5 w-5 text-muted-foreground mr-3" />
                 <div>
-                  <div className="text-sm text-muted-foreground">Status</div>
-                  <div className={cn("font-medium capitalize", getStatusColor(surgeryStatus))}>
+                  <p className="text-xs text-gray-400">Status</p>
+                  <p className={cn("text-lg font-semibold capitalize", getStatusColor(surgeryStatus))}>
                     {surgeryStatus}
-                  </div>
+                  </p>
                 </div>
               </div>
-            </div>
+            </aside>
           </div>
         </Card>
 
