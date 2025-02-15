@@ -1,15 +1,15 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { ChevronLeft, AlertTriangle } from "lucide-react";
-import { timeToMinutes } from "@/utils/timeUtils";
 import EmergencyDialog from "@/components/Timesheet/EmergencyDialog";
-import SurgeryRoomDropdown from "@/components/Timesheet/SurgeryRoomDropdown";
 import SurgeryBlock from "@/components/Timesheet/SurgeryBlock";
+import SurgeryRoomDropdown from "@/components/Timesheet/SurgeryRoomDropdown";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
 import { Surgery } from "@/types/Surgery";
-import { Dialog, DialogTrigger } from "@/components/ui/dialog";
+import { timeToMinutes } from "@/utils/timeUtils";
+import { AlertTriangle, ChevronLeft } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { mockSurgeries } from "@/mocks/surgery_mock";
 
@@ -18,6 +18,55 @@ const Timesheet = () => {
   const { toast } = useToast();
   const [showEmergencyDialog, setShowEmergencyDialog] = useState(false);
   const [surgeries, setSurgeries] = useState<Surgery[]>(mockSurgeries);
+  const socketRef = useRef<WebSocket | null>(null);
+
+  useEffect(() => {
+    socketRef.current = new WebSocket("ws://localhost:8000/ws");
+    const socket = socketRef.current;
+
+    socket.onopen = () => {
+      console.log("WebSocket connection established");
+    };
+
+    socket.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      console.log("Message from server:", data);
+      // Handle incoming data
+    };
+
+    socket.onclose = () => {
+      console.log("WebSocket connection closed");
+    };
+
+    socket.onerror = (error) => {
+      console.error("WebSocket error:", error);
+    };
+
+    return () => {
+      socket.close();
+    };
+  }, []);
+
+  const handleEmergencySurgery = (newSurgery: Omit<Surgery, "id">) => {
+    const surgeryToAdd: Surgery = {
+      ...newSurgery,
+      id: `emergency-${Date.now()}`,
+    };
+
+    setSurgeries((prev) => [...prev, surgeryToAdd]);
+    toast({
+      title: "Emergency Surgery Added",
+      description: "All relevant personnel have been notified.",
+      variant: "destructive",
+    });
+
+    // Send a message to the WebSocket server
+    if (socketRef.current) {
+      socketRef.current.send(JSON.stringify({ type: "emergency_surgery", data: surgeryToAdd }));
+    }
+
+    setShowEmergencyDialog(false);
+  };
 
   const today = new Date();
   const formattedDate = today.toLocaleDateString("en-GB", {
@@ -49,37 +98,6 @@ const Timesheet = () => {
       .then((response) => setSurgeries(response.data))
       .catch((error) => console.error("Error fetching surgeries:", error));
   }, []);
-
-  const handleEmergencySurgery = (newSurgery: Omit<Surgery, "id">) => {
-    const surgeryToAdd: Surgery = {
-      ...newSurgery,
-      id: `emergency-${Date.now()}`,
-    };
-    updateSurgeries(surgeryToAdd);
-    setSurgeries((prev) => [...prev, surgeryToAdd]);
-    toast({
-      title: "Emergency Surgery Added",
-      description: "All relevant personnel have been notified.",
-      variant: "destructive",
-    });
-    setShowEmergencyDialog(false);
-  };
-
-
-
-  const updateSurgeries = async (newSurgery: Surgery) => {
-    try {
-      const response = await axios.post("http://localhost:8000/surgeries", newSurgery, {
-        headers: { "Content-Type": "application/json" },
-      });
-      console.log('response ')
-      console.log('response : ',response.data )
-      setSurgeries(response.data);
-    } catch (error) {
-      console.error("Error updating surgeries:", error);
-    }
-  };
-
 
   return (
     <div className="layout-container max-w-4xl mx-auto">
@@ -139,14 +157,14 @@ const Timesheet = () => {
         {/* Surgery Blocks */}
         {surgeries.map((surgery) => (
           <SurgeryBlock
-          key={surgery.id}
-          surgery={surgery}
-          scheduleStart={scheduleStart}
-          hourHeight={hourHeight}
-          currentOffset={currentOffset}
-          setSurgeries={setSurgeries}
-        />
-        
+            key={surgery.id}
+            surgery={surgery}
+            scheduleStart={scheduleStart}
+            hourHeight={hourHeight}
+            currentOffset={currentOffset}
+            socket={socketRef.current}
+            setSurgeries={setSurgeries}
+          />
         ))}
       </Card>
 

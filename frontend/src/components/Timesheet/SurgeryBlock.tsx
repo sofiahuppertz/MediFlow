@@ -22,10 +22,11 @@ interface SurgeryBlockProps {
   scheduleStart: string;
   hourHeight: number;
   currentOffset: number;
+  socket: WebSocket;
   setSurgeries: (surgeries: Surgery[]) => void;
 }
 
-const SurgeryBlock = ({ surgery, scheduleStart, hourHeight, currentOffset, setSurgeries }: SurgeryBlockProps) => {
+const SurgeryBlock = ({ surgery, scheduleStart, hourHeight, currentOffset, socket, setSurgeries }: SurgeryBlockProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isDialogOpen, setDialogOpen] = useState(false);
@@ -72,6 +73,9 @@ const SurgeryBlock = ({ surgery, scheduleStart, hourHeight, currentOffset, setSu
     estimated: "border border-dashed",
     dynamic: "border border-dotted",
   };
+
+
+  // socket.send(JSON.stringify({ type: "surgery", id: surgery.id }));
 
   const formatDuration = (duration: number): string => {
     const hours = Math.floor(duration / 60);

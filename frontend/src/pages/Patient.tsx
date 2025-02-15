@@ -13,57 +13,27 @@ import {
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
-
-// Mock patient data
-const patientData = {
-  id: "123456",
-  name: "John Doe",
-  age: 35,
-  contact: "(555) 123-4567",
-  email: "john.doe@example.com",
-  surgery: {
-    type: "Appendectomy",
-    time: "2024-04-15T14:30:00",
-    status: "on-time", // 'on-time', 'delayed', or 'cancelled'
-    stopEatingTime: "2024-04-15T02:30:00"
-  },
-  latestActions: [
-    { id: 1, action: "Pre-surgery consultation completed", time: "2 hours ago" },
-    { id: 2, action: "Blood work results received", time: "4 hours ago" },
-    { id: 3, action: "Medication schedule updated", time: "1 day ago" },
-  ]
-};
+import axios from "axios";
 
 const PatientPage = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("info");
+  const [patientData, setPatientData] = useState(null);
 
   useEffect(() => {
-    const socket = new WebSocket("ws://localhost:8000/ws");
-
-    socket.onopen = () => {
-      console.log("WebSocket connection established");
+    const fetchData = async () => {
+      try {
+        const response = await axios.get("http://localhost:8000/get_patient_data");
+        setPatientData(response.data);
+      } catch (error) {
+        console.error("Error fetching patient data:", error);
+      }
     };
 
-    socket.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      console.log("Message from server:", data);
-      // Handle incoming data
-    };
-
-    socket.onclose = () => {
-      console.log("WebSocket connection closed");
-    };
-
-    socket.onerror = (error) => {
-      console.error("WebSocket error:", error);
-    };
-
-    return () => {
-      socket.close();
-    };
+    fetchData();
   }, []);
-
+  
+  if (!patientData) return <div>Loading patient data...</div>;
+  console.log(patientData);
   // Calculate time until surgery
   const calculateTimeUntil = () => {
     const surgery = new Date(patientData.surgery.time);
