@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,23 +14,59 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 
+// Mock patient data
+const patientData = {
+  id: "123456",
+  name: "John Doe",
+  age: 35,
+  contact: "(555) 123-4567",
+  email: "john.doe@example.com",
+  surgery: {
+    type: "Appendectomy",
+    time: "2024-04-15T14:30:00",
+    status: "on-time", // 'on-time', 'delayed', or 'cancelled'
+    stopEatingTime: "2024-04-15T02:30:00"
+  },
+  latestActions: [
+    { id: 1, action: "Pre-surgery consultation completed", time: "2 hours ago" },
+    { id: 2, action: "Blood work results received", time: "4 hours ago" },
+    { id: 3, action: "Medication schedule updated", time: "1 day ago" },
+  ]
+};
+
 const PatientPage = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("info");
 
-  // Mock data
-  const surgeryTime = "2025-02-25T14:30:00";
-  const stopEatingTime = "2025-02-25T02:30:00"; // 12 hours before surgery
-  const surgeryStatus = "on-time"; // could be 'on-time', 'delayed', or 'cancelled'
-  const latestActions = [
-    { id: 1, action: "Pre-surgery consultation completed", time: "2 hours ago" },
-    { id: 2, action: "Blood work results received", time: "4 hours ago" },
-    { id: 3, action: "Medication schedule updated", time: "1 day ago" },
-  ];
+  useEffect(() => {
+    const socket = new WebSocket("ws://localhost:8000/ws");
+
+    socket.onopen = () => {
+      console.log("WebSocket connection established");
+    };
+
+    socket.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      console.log("Message from server:", data);
+      // Handle incoming data
+    };
+
+    socket.onclose = () => {
+      console.log("WebSocket connection closed");
+    };
+
+    socket.onerror = (error) => {
+      console.error("WebSocket error:", error);
+    };
+
+    return () => {
+      socket.close();
+    };
+  }, []);
 
   // Calculate time until surgery
   const calculateTimeUntil = () => {
-    const surgery = new Date(surgeryTime);
+    const surgery = new Date(patientData.surgery.time);
     const now = new Date();
     const diff = surgery.getTime() - now.getTime();
 
@@ -41,7 +77,7 @@ const PatientPage = () => {
     return `${days}d ${hours}h ${minutes}m`;
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status) => {
     switch (status) {
       case "on-time":
         return "text-green-600";
@@ -66,19 +102,15 @@ const PatientPage = () => {
 
       <div className="grid gap-6">
         <Card className="p-6 animate-fade-up">
-          {/* Header section for patient info */}
-          <header className="mb-6">
-            <h2 className="text-2xl font-bold text-gray-900">John Doe</h2>
-            <p className="text-sm text-gray-500">Patient Dashboard</p>
-          </header>
-          
-          <div className="grid md:grid-cols-2 gap-6">
-            {/* Surgery Details Section */}
-            <section>
-              <h3 className="text-lg font-semibold text-gray-800 mb-2">Scheduled Surgery</h3>
-              <p className="text-sm text-gray-500 uppercase tracking-wide">Appendectomy</p>
-              <p className="mt-1 text-gray-600">
-                {new Date(surgeryTime).toLocaleDateString("en-US", {
+          <h2 className="text-xl font-medium mb-4">Welcome, {patientData.name}</h2>
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex-1">
+              <div className="text-sm text-muted-foreground mb-1">
+                Scheduled Surgery
+              </div>
+              <div className="font-medium">{patientData.surgery.type}</div>
+              <div className="text-sm text-muted-foreground mt-2">
+                {new Date(patientData.surgery.time).toLocaleDateString("en-US", {
                   weekday: "long",
                   year: "numeric",
                   month: "long",
@@ -86,62 +118,60 @@ const PatientPage = () => {
                   hour: "2-digit",
                   minute: "2-digit",
                 })}
-              </p>
-            </section>
-            
-            {/* Surgery Metrics & Status Section */}
-            <aside className="bg-secondary/50 p-4 rounded-lg space-y-4">
-              <div className="flex items-center">
-                <Clock className="h-5 w-5 text-muted-foreground mr-3" />
+              </div>
+            </div>
+            <div className="flex-1 bg-secondary/50 p-4 rounded-lg space-y-3">
+              <div className="flex items-center space-x-2">
+                <Clock className="h-5 w-5 text-muted-foreground" />
                 <div>
-                  <p className="text-xs text-gray-400">Time until surgery</p>
-                  <p className="text-lg font-semibold text-gray-900">{calculateTimeUntil()}</p>
+                  <div className="text-sm text-muted-foreground">Time until surgery</div>
+                  <div className="font-medium">{calculateTimeUntil()}</div>
                 </div>
               </div>
               
-              <div className="flex items-center">
-                <Info className="h-5 w-5 text-muted-foreground mr-3" />
+              <div className="flex items-center space-x-2">
+                <Info className="h-5 w-5 text-muted-foreground" />
                 <div>
-                  <p className="text-xs text-gray-400">Surgery Time</p>
-                  <p className="text-lg font-semibold text-gray-900">
-                    {new Date(surgeryTime).toLocaleTimeString("en-US", {
+                  <div className="text-sm text-muted-foreground">Surgery Time</div>
+                  <div className="font-medium">
+                    {new Date(patientData.surgery.time).toLocaleTimeString("en-US", {
                       hour: "2-digit",
                       minute: "2-digit",
                     })}
-                  </p>
+                  </div>
                 </div>
               </div>
-              
-              <div className="flex items-center">
-                <UtensilsCrossed className="h-5 w-5 text-muted-foreground mr-3" />
+
+              <div className="flex items-center space-x-2">
+                <UtensilsCrossed className="h-5 w-5 text-muted-foreground" />
                 <div>
-                  <p className="text-xs text-gray-400">Stop Eating &amp; Drinking</p>
-                  <p className="text-lg font-semibold text-gray-900">
-                    {new Date(stopEatingTime).toLocaleTimeString("en-US", {
+                  <div className="text-sm text-muted-foreground">Stop Eating & Drinking</div>
+                  <div className="font-medium">
+                    {new Date(patientData.surgery.stopEatingTime).toLocaleTimeString("en-US", {
                       hour: "2-digit",
                       minute: "2-digit",
                     })}
-                  </p>
+                  </div>
                 </div>
               </div>
-              
-              <div className="flex items-center">
-                <AlertTriangle className="h-5 w-5 text-muted-foreground mr-3" />
+
+              <div className="flex items-center space-x-2">
+                <AlertTriangle className="h-5 w-5 text-muted-foreground" />
                 <div>
-                  <p className="text-xs text-gray-400">Status</p>
-                  <p className={cn("text-lg font-semibold capitalize", getStatusColor(surgeryStatus))}>
-                    {surgeryStatus}
-                  </p>
+                  <div className="text-sm text-muted-foreground">Status</div>
+                  <div className={cn("font-medium capitalize", getStatusColor(patientData.surgery.status))}>
+                    {patientData.surgery.status}
+                  </div>
                 </div>
               </div>
-            </aside>
+            </div>
           </div>
         </Card>
 
         <Card className="p-6 animate-fade-up delay-100">
           <h3 className="text-lg font-medium mb-4">Latest Actions</h3>
           <div className="space-y-4">
-            {latestActions.map((action) => (
+            {patientData.latestActions.map((action) => (
               <div
                 key={action.id}
                 className="flex items-start space-x-3 p-3 bg-secondary/30 rounded-lg"
@@ -165,9 +195,11 @@ const PatientPage = () => {
             <TabsContent value="info" className="space-y-4">
               <h4 className="font-medium">Personal Information</h4>
               <div className="space-y-2 text-sm text-muted-foreground">
-                <p>Name: John Doe</p>
-                <p>Patient ID: 123456</p>
-                <p>Contact: (555) 123-4567</p>
+                <p>Name: {patientData.name}</p>
+                <p>Age: {patientData.age}</p>
+                <p>Patient ID: {patientData.id}</p>
+                <p>Contact: {patientData.contact}</p>
+                <p>Email: {patientData.email}</p>
               </div>
             </TabsContent>
             <TabsContent value="delay" className="space-y-4">
