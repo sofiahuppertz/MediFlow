@@ -24,6 +24,10 @@ async def on_startup():
   create_db_and_tables()
   setup_admin(app)
 
+@app.get("/")
+def read_root():
+    return {"Hello": "World"}
+
 @app.websocket("/items/{item_id}/ws")
 async def websocket_endpoint():
 #  handle communication between the medical staff and the patient
