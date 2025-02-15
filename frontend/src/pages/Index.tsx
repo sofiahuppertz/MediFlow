@@ -10,14 +10,18 @@ const Index = () => {
   return (
     <div className="layout-container flex flex-col items-center justify-center">
       <Card className="w-full max-w-md p-6 space-y-8 animate-fade-up shadow-lg">
-        <h1 className="text-3xl font-semibold text-center">Surgery Scheduler Hub</h1>
+        <div className="flex items-center justify-center space-x-4">
+          <img src="/images/logo.png" alt="Logo" className="size-12"/>
+          <h1 className="text-5xl font-medium font-merriweather text-center">MediFlow</h1>
+        </div>
         <p className="text-muted-foreground text-center">
           Welcome to your medical management portal
         </p>
         
         <div className="grid gap-4 mt-8">
           <Button
-            className="w-full h-16 text-lg transition-smooth hover:scale-[1.02]"
+            variant="outline"
+            className="w-full h-16 text-lg transition-smooth hover:scale-[1.02] bg-[#06BCDB] bg-opacity-50 hover:bg-[#06BCDB] hover:bg-opacity-75"
             onClick={() => navigate("/timesheet")}
           >
             <CalendarRange className="mr-2 h-5 w-5" />
