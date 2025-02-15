@@ -80,6 +80,9 @@ export default {
         "fade-up": "fade-up 0.5s ease-out",
         "fade-down": "fade-down 0.5s ease-out",
       },
+      fontFamily: {
+        merriweather: ["'Merriweather'", "serif"],
+      },
     },
   },
   plugins: [require("tailwindcss-animate")],
