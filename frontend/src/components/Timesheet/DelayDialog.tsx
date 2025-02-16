@@ -31,6 +31,7 @@ const DelayDialog = ({ surgery, onDelaySubmit, onClose, socket }: DelayDialogPro
     onDelaySubmit(surgery.id, delayMinutes, reason);
     socket.send(
       JSON.stringify({
+        "receiver": "patient",
         surgeryId: surgery.id,
         delayMinutes,
         reason,

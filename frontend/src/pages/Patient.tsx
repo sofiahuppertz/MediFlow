@@ -1,3 +1,6 @@
+import React from 'react';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -15,10 +18,44 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+// Custom toast component
+const SurgeryDelayToast = ({ closeToast, delayMinutes, reason, addAction }) => {
+  if (!delayMinutes || !reason) {
+    return null;
+  }
+
+  const handleAcknowledge = () => {
+    console.log("Patient acknowledged: I acknowledge I have read and understood yes");
+    addAction({
+      id: new Date().getTime(), // Unique ID based on timestamp
+      action: `Surgery delayed by ${delayMinutes} minute(s) due to ${reason}`,
+      time: "Just now",
+    });
+    closeToast();
+  };
+
+  return (
+    <div>
+      <p>
+        Your surgery has been delayed by {delayMinutes} minute(s) due to {reason}.
+      </p>
+      <button onClick={handleAcknowledge}>I acknowledge I have read and understood</button>
+    </div>
+  );
+};
+
 const PatientPage = () => {
   const navigate = useNavigate();
   const [patientData, setPatientData] = useState(null);
   const socketRef = useRef<WebSocket | null>(null);
+
+  const addAction = (action) => {
+    setPatientData((prevData) => ({
+      ...prevData,
+      latestActions: [action, ...prevData.latestActions],
+    }));
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -41,9 +78,26 @@ const PatientPage = () => {
     };
 
     socket.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      console.log("Message from server:", data);
-      // Handle incoming data
+      let data = JSON.parse(event.data);
+      if (typeof data === 'string') {
+        data = JSON.parse(data);
+      }
+
+      if (data.receiver === "patient") {
+        console.log("Received message for patient:", data);
+        toast.info(
+          <SurgeryDelayToast
+            delayMinutes={data.delayMinutes}
+            reason={data.reason}
+            closeToast={toast.dismiss}
+            addAction={addAction}
+          />,
+          {
+            autoClose: false, // Stays until acknowledged
+            position: "top-right",
+          }
+        );
+      }
     };
 
     socket.onclose = () => {
@@ -58,9 +112,9 @@ const PatientPage = () => {
       socket.close();
     };
   }, []);
-  
+
   if (!patientData) return <div>Loading patient data...</div>;
-  
+
   // Calculate time until surgery
   const calculateTimeUntil = () => {
     const surgery = new Date(patientData.surgery.time);
@@ -89,6 +143,7 @@ const PatientPage = () => {
 
   return (
     <div className="layout-container max-w-4xl mx-auto">
+      <ToastContainer />
       <div className="flex items-center mb-8 space-x-4">
         <Button variant="ghost" onClick={() => navigate("/")}>
           <ChevronLeft className="h-4 w-4 mr-2" />

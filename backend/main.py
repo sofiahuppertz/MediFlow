@@ -47,9 +47,8 @@ async def get_patient_data():
         "email": "john.doe@example.com",
         "surgery": {
             "type": "Appendectomy",
-            "time": "2024-04-15T14:30:00",
+            "time": "2025-02-16T14:30:00",
             "status": "on-time",  # 'on-time', 'delayed', or 'cancelled'
-            "stopEatingTime": "2024-04-15T02:30:00"
         },
         "latestActions": [
             {"id": 1, "action": "Pre-surgery consultation completed", "time": "2 hours ago"},
@@ -127,8 +126,8 @@ async def websocket_endpoint(websocket: WebSocket):
         while True:
             data = await websocket.receive_text()
             print("Received data:", data)
-            response = {"message": "Message received", "data": data}
-            await manager.broadcast(json.dumps(response))
+            # response = {"message": "Message received", "data": data}
+            await manager.broadcast(json.dumps(data))
             
     except WebSocketDisconnect:
         manager.disconnect(websocket)
