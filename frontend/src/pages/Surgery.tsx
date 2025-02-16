@@ -1,8 +1,8 @@
-
 import { useNavigate, useParams } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, Clock, UserRound, Stethoscope } from "lucide-react";
+import { motion } from "framer-motion";
 
 const mockSurgeryData = {
   "1": {
@@ -21,6 +21,18 @@ const mockSurgeryData = {
   },
 };
 
+const pageVariants = {
+  initial: { opacity: 0, x: 50 },
+  animate: { opacity: 1, x: 0 },
+  exit: { opacity: 0, x: -50 },
+};
+
+const pageTransition = {
+  type: "tween",
+  ease: "anticipate",
+  duration: 0.5,
+};
+
 const Surgery = () => {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -28,75 +40,108 @@ const Surgery = () => {
 
   if (!surgery) {
     return (
-      <div className="layout-container">
-        <div className="text-center">
-          <h1 className="text-2xl font-semibold mb-4">Surgery not found</h1>
-          <Button onClick={() => navigate("/timesheet")}>Return to Schedule</Button>
-        </div>
+      <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-white">
+        <h1 className="text-2xl font-bold mb-4 text-[#1A446D]">
+          Surgery not found
+        </h1>
+        <Button 
+          onClick={() => navigate("/timesheet")}
+          className="bg-[#0096C7] text-white hover:bg-[#0078A4]"
+        >
+          Return to Schedule
+        </Button>
       </div>
     );
   }
 
   return (
-    <div className="layout-container max-w-4xl mx-auto">
+    <motion.div
+      initial="initial"
+      animate="animate"
+      exit="exit"
+      variants={pageVariants}
+      transition={pageTransition}
+      className="max-w-4xl mx-auto p-6 bg-white">
       <div className="flex items-center mb-8 space-x-4">
-        <Button variant="ghost" onClick={() => navigate("/timesheet")}>
-          <ChevronLeft className="h-4 w-4 mr-2" />
-          Back to Schedule
+        <Button
+          variant="ghost"
+          onClick={() => navigate("/timesheet")}
+          className="flex items-center text-[#0096C7] hover:text-[#0096C7]/80"
+        >
+          <ChevronLeft className="h-5 w-5 mr-2" />
+          Back
         </Button>
-        <h1 className="text-2xl font-semibold">{surgery.title}</h1>
+        <h1 className="text-3xl font-bold text-[#1A446D]">
+          {surgery.title}
+        </h1>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
-        <Card className="p-6 animate-fade-up">
+        <Card className="p-6 rounded-lg shadow-sm">
           <div className="flex items-center mb-4">
-            <Clock className="h-5 w-5 mr-2 text-muted-foreground" />
-            <h2 className="text-lg font-medium">Surgery Details</h2>
+            <Clock className="h-5 w-5 mr-2 text-[#0096C7]" />
+            <h2 className="text-xl font-semibold text-[#1A446D]">
+              Surgery Details
+            </h2>
           </div>
-          <dl className="space-y-2">
+          <dl className="space-y-3">
             <div>
-              <dt className="text-sm text-muted-foreground">Time</dt>
-              <dd className="font-medium">
+              <dt className="text-sm text-gray-500">Time</dt>
+              <dd className="text-lg font-medium text-[#1A446D]">
                 {surgery.startTime} - {surgery.endTime}
               </dd>
             </div>
             <div>
-              <dt className="text-sm text-muted-foreground">Room</dt>
-              <dd className="font-medium">{surgery.patient.roomNumber}</dd>
+              <dt className="text-sm text-gray-500">Room</dt>
+              <dd className="text-lg font-medium text-[#1A446D]">
+                {surgery.patient.roomNumber}
+              </dd>
             </div>
             <div>
-              <dt className="text-sm text-muted-foreground">Status</dt>
-              <dd className="font-medium capitalize">{surgery.status}</dd>
+              <dt className="text-sm text-gray-500">Status</dt>
+              <dd className="text-lg font-medium capitalize text-[#1A446D]">
+                {surgery.status}
+              </dd>
             </div>
           </dl>
         </Card>
 
-        <Card className="p-6 animate-fade-up delay-100">
+        <Card className="p-6 rounded-lg shadow-sm">
           <div className="flex items-center mb-4">
-            <UserRound className="h-5 w-5 mr-2 text-muted-foreground" />
-            <h2 className="text-lg font-medium">Patient Information</h2>
+            <UserRound className="h-5 w-5 mr-2 text-[#0096C7]" />
+            <h2 className="text-xl font-semibold text-[#1A446D]">
+              Patient Information
+            </h2>
           </div>
-          <dl className="space-y-2">
+          <dl className="space-y-3">
             <div>
-              <dt className="text-sm text-muted-foreground">Name</dt>
-              <dd className="font-medium">{surgery.patient.name}</dd>
+              <dt className="text-sm text-gray-500">Name</dt>
+              <dd className="text-lg font-medium text-[#1A446D]">
+                {surgery.patient.name}
+              </dd>
             </div>
             <div>
-              <dt className="text-sm text-muted-foreground">Age</dt>
-              <dd className="font-medium">{surgery.patient.age}</dd>
+              <dt className="text-sm text-gray-500">Age</dt>
+              <dd className="text-lg font-medium text-[#1A446D]">
+                {surgery.patient.age}
+              </dd>
             </div>
           </dl>
         </Card>
 
-        <Card className="p-6 md:col-span-2 animate-fade-up delay-200">
+        <Card className="p-6 rounded-lg shadow-sm md:col-span-2">
           <div className="flex items-center mb-4">
-            <Stethoscope className="h-5 w-5 mr-2 text-muted-foreground" />
-            <h2 className="text-lg font-medium">Medical Notes</h2>
+            <Stethoscope className="h-5 w-5 mr-2 text-[#0096C7]" />
+            <h2 className="text-xl font-semibold text-[#1A446D]">
+              Medical Notes
+            </h2>
           </div>
-          <p className="text-muted-foreground">{surgery.notes}</p>
+          <p className="text-gray-700">
+            {surgery.notes}
+          </p>
         </Card>
       </div>
-    </div>
+    </motion.div>
   );
 };
 
