@@ -103,9 +103,8 @@ const SurgeryBlock = ({ surgery, scheduleStart, hourHeight, currentOffset, socke
     >
       <div
         className={cn(
-          "rounded-t-lg px-4 py-3 relative",
-          statusColors[dynamicStatus],
-          timeTypeStyles[surgery.timeType]
+          "px-4 py-3 relative border",
+          delayMins > 0 ? "rounded-t-lg" : "rounded-lg",
         )}
         style={{ height: baseHeight }}
       >
