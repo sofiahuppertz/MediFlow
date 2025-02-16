@@ -25,5 +25,5 @@ class Inference:
         predictions = self.inference_pipeline(loaded_model,sample_curated)
         # predictions = pd.DataFrame(predictions, columns=["predicted_duration"]).to_csv("predictions.csv", index=False)
         print("Stop inference")
-        return predictions[0]
+        return predictions[1]
     

@@ -11,6 +11,8 @@ from models import Medicament, Patient, Staff, Surgery, Timesheet
 from sqlmodel import Session, select
 from functions.inference_code import Inference
 import json
+from datetime import datetime, timedelta
+import os
 
 SessionDep = Annotated[Session, Depends(get_session)]
 SURGERIES_FILE = "mock_surgery.json"
@@ -64,28 +66,65 @@ async def get_patient_data():
 def read_surgeries():
     return load_surgeries()
 
+def adjust_schedule(operations):
+    fmt = "%H:%M"
+    for i in range(len(operations) - 1):
+        current_end = datetime.strptime(operations[i]['endTime'], fmt)
+        next_start = datetime.strptime(operations[i + 1]['startTime'], fmt)
+
+        # Check if the next operation starts before the current one ends
+        if current_end >= next_start:
+            # Shift the next operation by 10 minutes
+            new_start = current_end + timedelta(minutes=10)
+            new_end = new_start + (next_start - datetime.strptime(operations[i + 1]['startTime'], fmt))
+
+            # Update the next operation's start and end times
+            operations[i + 1]['startTime'] = new_start.strftime(fmt)
+            operations[i + 1]['endTime'] = (datetime.strptime(operations[i + 1]['endTime'], fmt) + timedelta(minutes=10)).strftime(fmt)
+
+    return operations
+
 def save_surgeries(updated_surgery):
-    print('updated_surgery : ', updated_surgery)
-    # Read the current surgeries from the file
-    try:
-        with open(SURGERIES_FILE, "r") as file:
-            surgeries = json.load(file)
-    except FileNotFoundError:
-        # If the file doesn't exist, initialize an empty list
-        surgeries = []
+    print('Received updated_surgery:', updated_surgery)
+
+    if not updated_surgery or not isinstance(updated_surgery, list) or "id" not in updated_surgery[0]:
+        print("Error: Invalid surgery data structure")
+        return
     
-    # Find the surgery with the matching id and replace it
-    for i, surgery in enumerate(surgeries):
-        if surgery["id"] == updated_surgery[0]["id"]:
-            surgeries[i] = updated_surgery[0]  # Replace the surgery
-            break
+    # Ensure the file exists before reading
+    if not os.path.exists(SURGERIES_FILE):
+        print(f"{SURGERIES_FILE} not found, creating a new file.")
+        surgeries = []
     else:
-        # If no matching surgery was found, you could optionally append the new surgery
+        try:
+            with open(SURGERIES_FILE, "r") as file:
+                surgeries = json.load(file)
+        except (json.JSONDecodeError, FileNotFoundError) as e:
+            print(f"Error reading file: {e}. Initializing an empty list.")
+            surgeries = []
+
+    # Update or append the surgery
+    updated_surgery_id = updated_surgery[0]["id"]
+    surgery_found = False
+    for i, surgery in enumerate(surgeries):
+        if surgery.get("id") == updated_surgery_id:
+            print(f"Updating surgery with ID {updated_surgery_id}.")
+            surgeries[i] = updated_surgery[0]
+            surgery_found = True
+            break
+
+    if not surgery_found:
+        print(f"No surgery with ID {updated_surgery_id} found. Appending new surgery.")
         surgeries.append(updated_surgery[0])
 
-    # Save the updated list back to the file
-    with open(SURGERIES_FILE, "w") as file:
-        json.dump(surgeries, file, indent=4)
+    # Write the updated surgeries back to the file
+    try:
+        with open(SURGERIES_FILE, "w") as file:
+            json.dump(surgeries, file, indent=4)
+        print(f"Surgery with ID {updated_surgery_id} successfully saved.")
+    except Exception as e:
+        print(f"Failed to write to file: {e}")
+
 
 
 @app.post("/surgeries")
