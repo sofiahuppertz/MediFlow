@@ -87,7 +87,7 @@ const Timesheet = () => {
   // Current time indicator calculation
   const now = new Date();
   const nowMinutes = now.getHours() * 60 + now.getMinutes();
-  const currentOffset: number = 450;
+  const currentOffset: number = 300;
   // if (nowMinutes >= startMinutes && nowMinutes <= endMinutes) {
   //   currentOffset = ((nowMinutes - startMinutes) / 60) * hourHeight;
   // }
@@ -102,7 +102,11 @@ const Timesheet = () => {
   return (
     <div className="layout-container max-w-4xl mx-auto">
       <div className="flex items-center mb-8 space-x-4">
-        <Button variant="ghost" onClick={() => navigate("/")}>
+        <Button
+          variant="ghost"
+          onClick={() => navigate("/")}
+          className="text-[#0096C7]"
+          >
           <ChevronLeft className="h-4 w-4 mr-2" />
           Back
         </Button>

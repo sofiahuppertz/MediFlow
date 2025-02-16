@@ -10,12 +10,17 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useState } from "react";
 
-// const getTimeTypeEmoji = (dynamicStatus: string): string => {
-//   if (dynamicStatus === "scheduled") return "🚧";
-//   if (dynamicStatus === "estimated") return "🕒";
-//   if (dynamicStatus === "dynamic") return "⚡️";
-//   return "";
-// };
+import { FaTools, FaCheckCircle, FaClock } from 'react-icons/fa';
+
+const getTimeTypeIcon = (dynamicStatus: string): JSX.Element | null => {
+  const iconMap: Record<string, JSX.Element> = {
+    "in-progress": <FaTools />,
+    "completed": <FaCheckCircle />,
+    "scheduled": <FaClock />,
+  };
+
+  return iconMap[dynamicStatus] || null;
+};
 
 interface SurgeryBlockProps {
   surgery: Surgery;
@@ -63,10 +68,11 @@ const SurgeryBlock = ({ surgery, scheduleStart, hourHeight, currentOffset, socke
   };
 
   const statusColors = {
-    scheduled: "bg-blue-100 text-blue-800 border-blue-200",
-    "in-progress": "bg-yellow-100 text-yellow-800 border-yellow-200",
-    completed: "bg-green-100 text-green-800 border-green-200",
+    scheduled: "bg-[#4B0082]/20 text-black border-[#4B0082]/50",
+    "in-progress": "bg-[#E5C07B]/20 text-black border-[#E5C07B]/50",
+    completed: "bg-[#06BCDB]/20 text-black border-[#06BCDB]/50",
   };
+  
 
   const timeTypeStyles = {
     locked: "border-2",
@@ -109,7 +115,7 @@ const SurgeryBlock = ({ surgery, scheduleStart, hourHeight, currentOffset, socke
               className="h-auto p-0 text-left font-medium hover:bg-transparent"
               onClick={() => navigate(`/surgery/${surgery.id}`)}
             >
-              {surgery.title}
+              {getTimeTypeIcon(dynamicStatus)} {surgery.title}
             </Button>
             <div className="text-sm">
               <Clock className="h-3 w-3 inline-block mr-1" />
@@ -141,7 +147,7 @@ const SurgeryBlock = ({ surgery, scheduleStart, hourHeight, currentOffset, socke
       </div>
       {delayMins > 0 && (
         <div
-          className="flex items-center justify-between rounded-b-lg px-4 py-2 border-t border-dashed bg-red-100 text-red-700"
+          className="flex items-center justify-between rounded-b-lg px-4 py-2 border-t border-dashed bg-[#FF6B6B]/20 text-[#FF6B6B] border-[#FF6B6B]/50"
           style={{ height: delayHeight }}
         >
           <div className="text-sm font-bold">+{surgery.delayDuration} min Delay</div>
