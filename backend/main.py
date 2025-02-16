@@ -39,22 +39,22 @@ async def on_startup():
 async def get_patient_data():
     patient_data = {
         "id": "123456",
-        "name": "John Doe",
-        "age": 35,
+        "name": "Chloé Dupont",
+        "age": 75,
         "contact": "(555) 123-4567",
-        "email": "john.doe@example.com",
+        "email": "chloe.dupont@example.com",
         "medicaments":
             [
                 {"name": "Pyridostigmine", "dose": "60mg", "frequency": "every 8 hours"},
                 {"name": "Prednisone", "dose": "5mg", "frequency": "every 12 hours"},
             ],
         "surgery": {
-            "type": "Appendectomy",
-            "time": "2025-02-16T14:30:00",
+            "type": "Hip Replacement",
+            "time": "2025-02-16T11:00:00",
             "status": "on-time",  # 'on-time', 'delayed', or 'cancelled'
         },
         "latestActions": [
-            {"id": 1, "action": "Remember not to take  Pyridostigmine", "time": "8 hours ago"},
+            {"id": 1, "action": "Remember not to take  Pyridostigmine", "time": "4 hours ago"},
             {"id": 2, "action": "Pre-surgery consultation completed", "time": "2 days ago"},
         ]
     }

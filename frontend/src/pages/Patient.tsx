@@ -95,24 +95,47 @@ const PatientPage = () => {
     socket.onmessage = (event) => {
       let data = JSON.parse(event.data);
       if (typeof data === 'string') {
-        data = JSON.parse(data);
+      data = JSON.parse(data);
       }
 
       if (data.receiver === "patient") {
-        console.log("Received message for patient:", data);
-        toast.info(
-          <SurgeryDelayToast
-            delayMinutes={data.delayMinutes}
-            reason={data.reason}
-            closeToast={toast.dismiss}
-            addAction={addAction}
-          />,
-          {
-            autoClose: false, // Stays until acknowledged
-            position: "top-right",
-          }
-        );
+      console.log("Received message for patient:", data);
+      toast.info(
+        <SurgeryDelayToast
+        delayMinutes={data.delayMinutes}
+        reason={data.reason}
+        closeToast={toast.dismiss}
+        addAction={addAction}
+        />,
+        {
+        autoClose: false, // Stays until acknowledged
+        position: "top-right",
+        }
+      );
       }
+
+      // Update surgery, stop eating and stop drinking time by adding the time in delayMinutes and changing the status to delayed
+      setPatientData((prevData) => {
+        const currentSurgeryTime = new Date(prevData?.surgery?.time);
+        if (isNaN(currentSurgeryTime.getTime()) || !data?.delayMinutes) {
+          return prevData; // Skip update if invalid
+        }
+        currentSurgeryTime.setMinutes(currentSurgeryTime.getMinutes() + data.delayMinutes);
+        
+        const updatedStopEatingTime = new Date(currentSurgeryTime.getTime() - 6 * 60 * 60 * 1000);
+        const updatedStopDrinkingTime = new Date(currentSurgeryTime.getTime() - 2 * 60 * 60 * 1000);
+      
+        return {
+          ...prevData,
+          surgery: {
+          ...prevData.surgery,
+          time: currentSurgeryTime.toISOString(),
+          status: "delayed",
+          },
+          stopEatingTime: updatedStopEatingTime.toISOString(),
+          stopDrinkingTime: updatedStopDrinkingTime.toISOString(),
+        };
+        });
     };
 
     socket.onclose = () => {
