@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import axios from "axios";
 import {
   AlertTriangle,
+  Check,
   ChevronLeft,
   Clock,
   History,
@@ -50,11 +51,23 @@ const SurgeryDelayToast = ({ closeToast, delayMinutes, reason, addAction }) => {
   };
 
   return (
-    <div>
-      <p>
-        Your surgery has been delayed by {delayMinutes} minute(s) due to {reason}.
-      </p>
-      <button onClick={handleAcknowledge}>I acknowledge I have read and understood</button>
+    <div className="bg-white rounded-lg shadow-lg overflow-hidden" style={{ maxWidth: '300px' }}>
+      <div className="bg-orange-100 p-4 flex items-center">
+        <AlertTriangle className="text-orange-500 mr-2" size={24} />
+        <h3 className="text-orange-800 font-semibold">Surgery Delay</h3>
+      </div>
+      <div className="p-4">
+        <p className="text-gray-700 mb-4">
+          Your surgery has been delayed by <span className="font-semibold">{delayMinutes} minute(s)</span> due to {reason}.
+        </p>
+        <button 
+          onClick={handleAcknowledge}
+          className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition duration-200 flex items-center justify-center"
+        >
+          <Check size={18} className="mr-2" />
+          I acknowledge
+        </button>
+      </div>
     </div>
   );
 };

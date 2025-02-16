@@ -161,13 +161,15 @@ const Surgery = () => {
             </h2>
           </div>
           <p className="text-gray-700">
+            {surgery.notes}
+          </p>
           <p className="text-gray-700">
             
             {parseFloat(complicationScore) * 100 < 20 ? 'Limited Risk of complication : ' : parseFloat(complicationScore) * 100 <= 50 ? 'Significant Risk of complication : ' : 'Critical Risk of complication : '}
             {parseFloat(complicationScore) * 100} 
         </p>
 
-        </p>
+        
         </Card>
       </div>
     </motion.div>

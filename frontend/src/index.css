@@ -82,3 +82,14 @@
     @apply inline-flex items-center justify-center rounded-lg bg-primary px-8 py-4 text-sm font-medium text-primary-foreground shadow transition-smooth hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50;
   }
 }
+
+.custom-toast-container {
+  width: 100%;
+  max-width: 300px;
+  padding: 0;
+}
+
+.Toastify__toast {
+  padding: 0;
+  min-height: auto;
+}
