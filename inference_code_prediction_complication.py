@@ -28,9 +28,9 @@ def inference_pipeline(data, model_path='models_and_preprocessing/model_predicti
     # Load model and preprocessor
     model = load_model(model_path)
     y_prob = model.predict_proba(data)[:, 1]
-    threshold = 0.18
-    pred_custom = (y_prob >= threshold).astype(int)
-    return pred_custom
+    # threshold = 0.18
+    # pred_custom = (y_prob >= threshold).astype(int)
+    return y_prob
 
 def main():
     """
