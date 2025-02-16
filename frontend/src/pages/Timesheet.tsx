@@ -181,6 +181,7 @@ const Timesheet = () => {
           <EmergencyDialog
             onSubmit={handleEmergencySurgery}
             onClose={() => setShowEmergencyDialog(false)}
+            socket={socketRef.current}
           />
         </Dialog>
       </div>

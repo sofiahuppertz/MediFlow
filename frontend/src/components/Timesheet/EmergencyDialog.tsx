@@ -11,9 +11,10 @@ import axios from "axios";
 interface EmergencyDialogProps {
   onSubmit: (surgery: Omit<Surgery, "id">) => void;
   onClose: () => void;
+  socket: WebSocket;
 }
 
-const EmergencyDialog = ({ onSubmit, onClose }: EmergencyDialogProps) => {
+const EmergencyDialog = ({ onSubmit, onClose, socket }: EmergencyDialogProps) => {
   const [title, setTitle] = useState("");
   const [startTime, setStartTime] = useState("");
   const [duration, setDuration] = useState(60);
@@ -50,7 +51,14 @@ const EmergencyDialog = ({ onSubmit, onClose }: EmergencyDialogProps) => {
       });
       console.log('result : ',newSurgery )
       onSubmit(newSurgery);
-      
+      socket.send(
+        JSON.stringify({
+          "receiver": "patient",
+          surgeryId:"4",
+          "delayMinutes":"25",
+          "reason":"emergency",
+        })
+      );
       // window.location.reload();
 
     } catch (error) {
