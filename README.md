@@ -2,6 +2,8 @@
 
 🌟 A portal between hospitals and patient. A platform optimizing surgical workflows with AI-powered predictions and real-time coordination
 
+**NOTE : the AI training notebooks are in the ai-dev branch**
+
 ## 📑 Table of Contents
 - [Landing Page](#landing-page)
 - [✨ Key Features](#-key-features)
