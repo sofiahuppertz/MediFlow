@@ -2,7 +2,7 @@
 
 This branch contains the code used for the creation of two ML models (training notebook, inference scripts, datasets and models) for anesthesia-related predictions:
 1. A model to predict the upper bound (90% confidence) of anesthesia duration for surgical operations
-2. A model to predict potential complications after anesthesia (binary classification)
+2. A model to predict potential complications after anesthesia (binary classification, output probability)
 
 These models are integrated into the workflow of the MediFlow app
 

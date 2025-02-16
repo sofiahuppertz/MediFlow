@@ -23,7 +23,7 @@ def inference_pipeline(data, model_path='models_and_preprocessing/model_predicti
         model_path (str): Path to the saved model pickle file
     
     Returns:
-        numpy.ndarray: Binary predictions (0 or 1) for complications
+        numpy.ndarray: Probability prediction
     """
     # Load model and preprocessor
     model = load_model(model_path)
