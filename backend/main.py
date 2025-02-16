@@ -17,6 +17,7 @@ import os
 
 SessionDep = Annotated[Session, Depends(get_session)]
 SURGERIES_FILE = "mock_surgery.json"
+SURGERIES_FILE_INIT = "mock_surgery_initial.json"
 
 
 app = FastAPI()
@@ -117,6 +118,21 @@ def consistency():
 
     print("Operations schedule updated successfully.")
 
+
+def copy_json(source_file, destination_file):
+    try:
+        # Open and read the source JSON file
+        with open(source_file, 'r') as src:
+            data = json.load(src)
+
+        # Write the data to the destination JSON file
+        with open(destination_file, 'w') as dst:
+            json.dump(data, dst, indent=4)
+            
+        print("JSON content copied successfully!")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
 def save_surgeries(updated_surgery):
     surgeries = load_surgeries()
     
@@ -170,6 +186,10 @@ def update_surgery(surgery: dict):
 @app.get("/surgeries")
 def read_surgeries():
     return load_surgeries()
+@app.get("/init")
+def init():
+    copy_json(SURGERIES_FILE_INIT,SURGERIES_FILE)
+    return "done"
 
 @app.get("/delay_prediction")
 def inference_model():

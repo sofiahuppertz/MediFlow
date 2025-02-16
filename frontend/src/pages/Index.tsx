@@ -3,10 +3,17 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { UserRound, CalendarRange } from "lucide-react";
+import { useEffect } from "react";
+import axios from "axios";
 
 const Index = () => {
   const navigate = useNavigate();
-
+  useEffect(() => {
+    const apiUrl = import.meta.env.VITE_VM_HTTP_URL; // Get API URL from .env
+      
+    const response = axios.get(`${apiUrl}/init`);
+      
+  });
   return (
     <div className="layout-container flex flex-col items-center justify-center">
       <Card className="w-full max-w-md p-6 space-y-8 animate-fade-up shadow-lg">

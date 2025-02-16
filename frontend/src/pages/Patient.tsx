@@ -51,9 +51,9 @@ const SurgeryDelayToast = ({ closeToast, delayMinutes, reason, addAction }) => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-lg overflow-hidden" style={{ maxWidth: '300px' }}>
-      <div className="bg-orange-100 p-4 flex items-center">
-        <AlertTriangle className="text-orange-500 mr-2" size={24} />
+    <div className="bg-white bg-opacity-90 rounded-lg shadow-lg overflow-hidden" style={{ maxWidth: '300px' }}>
+      <div className="p-4 flex items-center">
+        <AlertTriangle className="text-orange-500 mr-2 filter" size={24} />
         <h3 className="text-orange-800 font-semibold">Surgery Delay</h3>
       </div>
       <div className="p-4">
@@ -69,7 +69,7 @@ const SurgeryDelayToast = ({ closeToast, delayMinutes, reason, addAction }) => {
         </button>
       </div>
     </div>
-  );
+  );  
 };
 
 const PatientPage = () => {
@@ -118,16 +118,20 @@ const PatientPage = () => {
       console.log("Received message for patient:", data);
       toast.info(
         <SurgeryDelayToast
-        delayMinutes={data.delayMinutes}
-        reason={data.reason}
-        closeToast={toast.dismiss}
-        addAction={addAction}
+          delayMinutes={data.delayMinutes}
+          reason={data.reason}
+          closeToast={toast.dismiss}
+          addAction={addAction}
         />,
         {
-        autoClose: false, // Stays until acknowledged
-        position: "top-right",
+          autoClose: false,
+          position: "top-center",
+          closeButton: false,
+          className: 'surgery-delay-toast', // Add a specific class for this toast
+          style: { background: 'transparent', boxShadow: 'none' }, // Make background transparent and remove shadow
         }
       );
+           
       }
 
       // Update surgery, stop eating and stop drinking time by adding the time in delayMinutes and changing the status to delayed
