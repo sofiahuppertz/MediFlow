@@ -3,6 +3,8 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, Clock, UserRound, Stethoscope } from "lucide-react";
 import { motion } from "framer-motion";
+import axios from "axios";
+import { useEffect, useState } from "react";
 
 const mockSurgeryData = {
   "1": {
@@ -37,7 +39,29 @@ const Surgery = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const surgery = mockSurgeryData[id as keyof typeof mockSurgeryData];
+  const [complicationScore, setComplicationScore] = useState("");
+  // Fetch complication prediction when component mounts
+  const fetchComplicationPrediction = async (surgery) => {
+    try {
+      const response = await axios.get("http://localhost:8000/complication_prediction");
+      console.log("response:", response);
+      console.log("Prediction response:", response.data);
+      setComplicationScore(response.data);
 
+    }
+    catch (error) {
+    console.error("Failed to fetch complication prediction:", error);
+    
+    }
+  };
+  useEffect(() => {
+      console.log('open : ', open)
+      if (open) {
+        console.log('open')
+        fetchComplicationPrediction(surgery);
+      }
+    }, [open]);
+    
   if (!surgery) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-white">
@@ -137,8 +161,13 @@ const Surgery = () => {
             </h2>
           </div>
           <p className="text-gray-700">
-            {surgery.notes}
-          </p>
+          <p className="text-gray-700">
+            
+            {parseFloat(complicationScore) * 100 < 20 ? 'Limited Risk of complication : ' : parseFloat(complicationScore) * 100 <= 50 ? 'Significant Risk of complication : ' : 'Critical Risk of complication : '}
+            {parseFloat(complicationScore) * 100} 
+        </p>
+
+        </p>
         </Card>
       </div>
     </motion.div>

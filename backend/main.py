@@ -3,13 +3,14 @@ from typing import Annotated, List
 
 from fastapi.responses import JSONResponse
 
+from functions.complication.complication_code import Complication
 from admin import setup_admin
 from database import create_db_and_tables, get_session
 from fastapi import Depends, FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from models import Medicament, Patient, Staff, Surgery, Timesheet
 from sqlmodel import Session, select
-from functions.inference_code import Inference
+from functions.prediction_code import Inference
 import json
 from datetime import datetime, timedelta
 import os
@@ -172,6 +173,15 @@ def inference_model():
     inference = Inference()
     prediction = inference.main({})
     return prediction
+
+
+@app.get("/complication_prediction")
+def complication_model():
+    print("Call complication")
+    complication = Complication()
+    prediction = complication.main()
+    print('pred end of endpoint : ', prediction)
+    return str(prediction)
 
 class ConnectionManager:
     def __init__(self):
