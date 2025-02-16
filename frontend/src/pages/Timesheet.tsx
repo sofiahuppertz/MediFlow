@@ -82,7 +82,7 @@ const Timesheet = () => {
   // Current time indicator calculation
   const now = new Date();
   const nowMinutes = now.getHours() * 60 + now.getMinutes();
-  const currentOffset: number = 300;
+  const currentOffset: number = 150;
 
   useEffect(() => {
     axios.get("http://localhost:8000/surgeries")

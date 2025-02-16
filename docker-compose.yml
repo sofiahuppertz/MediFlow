@@ -8,6 +8,8 @@ services:
       - "8000:8000"
     volumes:
       - ./backend:/app
+    environment:
+      - WATCHFILES_FORCE_POLLING=true
     depends_on:
       - frontend
 
@@ -19,3 +21,6 @@ services:
       - "3000:80"
     volumes:
       - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - CHOKIDAR_USEPOLLING=true
