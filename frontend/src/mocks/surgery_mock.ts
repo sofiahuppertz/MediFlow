@@ -5,17 +5,18 @@ export const mockSurgeries: Surgery[] = [
     {
       id: "1",
       title: "Appendectomy",
-      startTime: "09:00",
-      endTime: "10:30",
+      startTime: "07:00",
+      endTime: "11:30",
       status: "scheduled",
       progressStatus: "on-time",
       timeType: "dynamic",
     },
+    
     {
       id: "2",
       title: "Hip Replacement",
-      startTime: "11:00",
-      endTime: "13:00",
+      startTime: "12:00",
+      endTime: "13:30",
       status: "in-progress",
       progressStatus: "delayed",
       delayReason: "Equipment setup",

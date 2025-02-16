@@ -125,6 +125,7 @@ const SurgeryBlock = ({ surgery, scheduleStart, hourHeight, currentOffset, socke
             </DialogTrigger>
             <DelayDialog
               surgery={surgery}
+              open={isDialogOpen}
               onDelaySubmit={(id, delay, reason) => {
                 const updatedSurgery = { ...surgery, delayDuration: delay, delayReason: reason };
                 updateSurgeries(updatedSurgery);
