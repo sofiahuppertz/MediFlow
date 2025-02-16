@@ -5,7 +5,8 @@ import { ChevronLeft, Clock, UserRound, Stethoscope } from "lucide-react";
 import { motion } from "framer-motion";
 import axios from "axios";
 import { useEffect, useState } from "react";
-
+import dotenv from 'dotenv';
+dotenv.config();
 const mockSurgeryData = {
   "1": {
     id: "1",
@@ -41,9 +42,14 @@ const Surgery = () => {
   const surgery = mockSurgeryData[id as keyof typeof mockSurgeryData];
   const [complicationScore, setComplicationScore] = useState("");
   // Fetch complication prediction when component mounts
+
+
   const fetchComplicationPrediction = async (surgery) => {
+    const apiBaseUrl = process.env.API_URL + 'complication_prediction'
+    console.log('apiBaseUrl : ', apiBaseUrl)
+    // const response = await axios.get(apiBaseUrl);
     try {
-      const response = await axios.get("http://localhost:8000/complication_prediction");
+      const response = await axios.get(apiBaseUrl);
       console.log("response:", response);
       console.log("Prediction response:", response.data);
       setComplicationScore(response.data);

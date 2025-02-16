@@ -12,6 +12,8 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { mockSurgeries } from "@/mocks/surgery_mock";
+import dotenv from 'dotenv';
+dotenv.config();
 
 const Timesheet = () => {
   const navigate = useNavigate();
@@ -21,7 +23,7 @@ const Timesheet = () => {
   const socketRef = useRef<WebSocket | null>(null);
 
   useEffect(() => {
-    socketRef.current = new WebSocket("ws://localhost:8000/ws");
+    socketRef.current = new WebSocket("ws://"+process.env.API_WEBSOCKET+":8000/ws");
     const socket = socketRef.current;
 
     socket.onopen = () => {

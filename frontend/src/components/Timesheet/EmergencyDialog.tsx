@@ -7,6 +7,8 @@ import { useToast } from "@/components/ui/use-toast";
 import { addMinutesToTime } from "@/utils/timeUtils";
 import { Surgery } from "@/types/Surgery";
 import axios from "axios";
+import dotenv from 'dotenv';
+dotenv.config();
 
 interface EmergencyDialogProps {
   onSubmit: (surgery: Omit<Surgery, "id">) => void;
@@ -42,7 +44,7 @@ const EmergencyDialog = ({ onSubmit, onClose }: EmergencyDialogProps) => {
 
     try {
       
-      await axios.post("http://localhost:8000/surgeries", newSurgery, {
+      await axios.post(process.env.API_URL + "surgeries", newSurgery, {
         headers: { "Content-Type": "application/json" },
       });
       console.log('result : ',newSurgery )

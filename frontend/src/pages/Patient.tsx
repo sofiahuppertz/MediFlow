@@ -19,7 +19,8 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Surgery } from "@/types/Surgery";
-
+import dotenv from 'dotenv';
+dotenv.config();
 // Palette constants
 const palette = {
   brightCyan: "#06BCDB",
@@ -74,7 +75,7 @@ const PatientPage = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get("http://localhost:8000/get_patient_data");
+        const response = await axios.get(process.env.API_URL + 'get_patient_data');
         setPatientData(response.data);
       } catch (error) {
         console.error("Error fetching patient data:", error);
@@ -85,7 +86,7 @@ const PatientPage = () => {
   }, []);
 
   useEffect(() => {
-    socketRef.current = new WebSocket("ws://localhost:8000/ws");
+    socketRef.current = new WebSocket("ws://"+process.env.API_WEBSOCKET+"/ws");
     const socket = socketRef.current;
 
     socket.onopen = () => {

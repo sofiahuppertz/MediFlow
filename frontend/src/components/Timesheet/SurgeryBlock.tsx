@@ -11,6 +11,8 @@ import axios from "axios";
 import { useState } from "react";
 
 import { FaTools, FaCheckCircle, FaClock } from 'react-icons/fa';
+import dotenv from 'dotenv';
+dotenv.config();
 
 const getTimeTypeIcon = (dynamicStatus: string): JSX.Element | null => {
   const iconMap: Record<string, JSX.Element> = {
@@ -56,7 +58,7 @@ const SurgeryBlock = ({ surgery, scheduleStart, hourHeight, currentOffset, socke
   
   const updateSurgeries = async (newSurgery: Surgery) => {
     try {
-      const response = await axios.post("http://localhost:8000/surgeries", newSurgery, {
+      const response = await axios.post(process.env.API_URL + "/surgeries", newSurgery, {
         headers: { "Content-Type": "application/json" },
       });
       console.log("Response:", response.data);

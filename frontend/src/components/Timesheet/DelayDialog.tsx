@@ -7,6 +7,8 @@ import { useToast } from "@/components/ui/use-toast";
 import { addMinutesToTime } from "@/utils/timeUtils";
 import { Surgery } from "@/types/Surgery";
 import axios from "axios";
+import dotenv from 'dotenv';
+dotenv.config();
 
 interface DelayDialogProps {
   surgery: Surgery;
@@ -57,7 +59,7 @@ const DelayDialog = ({ surgery, open, onDelaySubmit, onClose, socket }: DelayDia
   // Fetch delay prediction when component mounts
   const fetchDelayPrediction = async (surgery) => {
     try {
-      const response = await axios.get("http://localhost:8000/delay_prediction");
+      const response = await axios.get(process.env.API_URL + 'delay_prediction');
       console.log("Prediction response:", response);
 
       if (response.data) {
