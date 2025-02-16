@@ -60,11 +60,6 @@ const Timesheet = () => {
       variant: "destructive",
     });
 
-    // Send a message to the WebSocket server
-    // if (socketRef.current) {
-    //   socketRef.current.send(JSON.stringify({ type: "emergency_surgery", data: surgeryToAdd }));
-    // }
-
     setShowEmergencyDialog(false);
   };
 
@@ -87,12 +82,8 @@ const Timesheet = () => {
   // Current time indicator calculation
   const now = new Date();
   const nowMinutes = now.getHours() * 60 + now.getMinutes();
-  const currentOffset: number = 450;
-  // if (nowMinutes >= startMinutes && nowMinutes <= endMinutes) {
-  //   currentOffset = ((nowMinutes - startMinutes) / 60) * hourHeight;
-  // }
+  const currentOffset: number = 300;
 
-  
   useEffect(() => {
     axios.get("http://localhost:8000/surgeries")
       .then((response) => setSurgeries(response.data))
@@ -100,9 +91,15 @@ const Timesheet = () => {
   }, []);
 
   return (
-    <div className="layout-container max-w-4xl mx-auto">
+    <div
+      className="layout-container max-w-4xl mx-auto"
+    >
       <div className="flex items-center mb-8 space-x-4">
-        <Button variant="ghost" onClick={() => navigate("/")}>
+        <Button
+          variant="ghost"
+          onClick={() => navigate("/")}
+          className="text-[#0096C7]"
+        >
           <ChevronLeft className="h-4 w-4 mr-2" />
           Back
         </Button>
@@ -162,7 +159,7 @@ const Timesheet = () => {
             scheduleStart={scheduleStart}
             hourHeight={hourHeight}
             currentOffset={currentOffset}
-            socket={socketRef.current}
+            socket={socketRef.current!}
             setSurgeries={setSurgeries}
           />
         ))}
