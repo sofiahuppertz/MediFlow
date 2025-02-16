@@ -15,11 +15,6 @@ import json
 SessionDep = Annotated[Session, Depends(get_session)]
 SURGERIES_FILE = "mock_surgery.json"
 
-# Load surgeries from a static JSON file
-def load_surgeries():
-    with open(SURGERIES_FILE, "r") as file:
-        return json.load(file)
-    
 
 app = FastAPI()
 
@@ -33,9 +28,9 @@ app.add_middleware(
 
 @app.on_event("startup")
 async def on_startup():
-  create_db_and_tables()
-  setup_admin(app)
-  
+    create_db_and_tables()
+    setup_admin(app)
+
 
 @app.get("/get_patient_data")
 async def get_patient_data():
@@ -57,41 +52,63 @@ async def get_patient_data():
         ]
     }
     return JSONResponse(content=patient_data)
+def load_surgeries():
+    with open(SURGERIES_FILE, "r") as file:
+        return json.load(file)
+
+def add_minutes(time_str, minutes_to_add):
+    hours, minutes = map(int, time_str.split(":"))
+    total = hours * 60 + minutes + minutes_to_add
+    new_hours = (total // 60) % 24
+    new_minutes = total % 60
+    return f"{new_hours:02d}:{new_minutes:02d}"
+
+def to_minutes(time_str):
+    h, m = map(int, time_str.split(":"))
+    return h * 60 + m
+
+def save_surgeries(updated_surgery):
+    surgeries = load_surgeries()
+    
+    # Update the existing surgery or add a new one
+    updated = False
+    for i, surgery in enumerate(surgeries):
+        if surgery["id"] == updated_surgery["id"]:
+            surgeries[i] = updated_surgery
+            updated = True
+            break
+    if not updated:
+        surgeries.append(updated_surgery)
+
+    # Sort by original startTime
+    surgeries.sort(key=lambda s: to_minutes(s["startTime"]))
+
+    # Apply cumulative delay
+    cumulative_delay = 0
+    for surgery in surgeries:
+        # Apply previous cumulative delay to this surgery
+        if cumulative_delay > 0:
+            surgery["startTime"] = add_minutes(surgery["startTime"], cumulative_delay)
+            surgery["endTime"] = add_minutes(surgery["endTime"], cumulative_delay)
+        
+        # Add this surgery's delay to the cumulative delay
+        if surgery.get("delayDuration", 0) > 0:
+            surgery["endTime"] = add_minutes(surgery["endTime"], surgery["delayDuration"])
+            cumulative_delay += surgery["delayDuration"]
+
+    with open(SURGERIES_FILE, "w") as file:
+        json.dump(surgeries, file, indent=4)
+    return surgeries
+
+
+@app.post("/surgeries")
+def update_surgery(surgery: dict):
+    updated_surgeries = save_surgeries(surgery)
+    return updated_surgeries
 
 @app.get("/surgeries")
 def read_surgeries():
     return load_surgeries()
-
-def save_surgeries(updated_surgery):
-    # print('updated_surgery : ', updated_surgery)
-    # Read the current surgeries from the file
-    try:
-        with open(SURGERIES_FILE, "r") as file:
-            surgeries = json.load(file)
-    except FileNotFoundError:
-        # If the file doesn't exist, initialize an empty list
-        surgeries = []
-    
-    # Find the surgery with the matching id and replace it
-    for i, surgery in enumerate(surgeries):
-        if surgery["id"] == updated_surgery[0]["id"]:
-            surgeries[i] = updated_surgery[0]  # Replace the surgery
-            break
-    else:
-        # If no matching surgery was found, you could optionally append the new surgery
-        surgeries.append(updated_surgery[0])
-
-    # Save the updated list back to the file
-    with open(SURGERIES_FILE, "w") as file:
-        json.dump(surgeries, file, indent=4)
-
-
-@app.post("/surgeries")
-def add_surgery(surgery: dict):
-    surgeries = load_surgeries()
-    surgeries.append(surgery)
-    save_surgeries(surgeries)
-    return surgeries
 
 @app.get("/delay_prediction")
 def inference_model():
