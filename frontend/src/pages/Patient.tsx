@@ -433,6 +433,7 @@ const PatientPage = () => {
                 className="space-y-2 text-sm"
                 style={{ color: palette.deepNavy, opacity: 0.8 }}
               >
+                
                 <p>All systems operational</p>
                 <p>No delays reported</p>
               </div>

@@ -14,6 +14,7 @@ from functions.prediction_code import Inference
 import json
 from datetime import datetime, timedelta
 import os
+import uuid
 
 SessionDep = Annotated[Session, Depends(get_session)]
 SURGERIES_FILE = "mock_surgery.json"
@@ -183,9 +184,20 @@ def update_surgery(surgery: dict):
     updated_surgeries = save_surgeries(surgery)
     return updated_surgeries
 
+@app.post("/create_surgeries")
+def update_surgery(surgery: dict):
+    print('surgery : ', surgery)
+    if "id" not in surgery:
+        surgery["id"] = str(4)  # Generate a UUID
+
+    updated_surgeries = save_surgeries(surgery)
+    
+    return {"message": "Surgery updated successfully", "updated_surgeries": updated_surgeries}
+
 @app.get("/surgeries")
 def read_surgeries():
     return load_surgeries()
+
 @app.get("/init")
 def init():
     copy_json(SURGERIES_FILE_INIT,SURGERIES_FILE)

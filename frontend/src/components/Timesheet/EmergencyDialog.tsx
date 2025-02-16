@@ -28,7 +28,7 @@ const EmergencyDialog = ({ onSubmit, onClose }: EmergencyDialogProps) => {
       });
       return;
     }
-    console.log('result : ' )
+    
 
     const endTime = addMinutesToTime(startTime, duration);
     const newSurgery: Omit<Surgery, "id"> = {
@@ -40,14 +40,19 @@ const EmergencyDialog = ({ onSubmit, onClose }: EmergencyDialogProps) => {
       timeType: "dynamic",
     };
 
+
+    
     try {
       const apiUrl = import.meta.env.VITE_VM_HTTP_URL; // Get API URL from .env
-      await axios.post(`${apiUrl}/surgeries`, newSurgery, {
+      console.log('newSurgery : ',newSurgery )
+      await axios.post(`${apiUrl}/create_surgeries`, newSurgery, {
         headers: { "Content-Type": "application/json" },
       });
       console.log('result : ',newSurgery )
       onSubmit(newSurgery);
-      window.location.reload();
+      
+      // window.location.reload();
+
     } catch (error) {
       console.error("Error updating surgeries:", error);
     }
