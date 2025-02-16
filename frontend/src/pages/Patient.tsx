@@ -374,6 +374,9 @@ const PatientPage = () => {
                 <p>Patient ID: {patientData.id}</p>
                 <p>Contact: {patientData.contact}</p>
                 <p>Email: {patientData.email}</p>
+                <div id="medicaments">Medicaments</div>
+                <p>Pyridostigmine: 60mg, every 8 hours</p>
+                <p>Prednisone: 5mg, every 12 hours</p>
               </div>
             </TabsContent>
             <TabsContent value="delay" className="space-y-4">
