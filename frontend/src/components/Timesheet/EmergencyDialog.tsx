@@ -41,8 +41,8 @@ const EmergencyDialog = ({ onSubmit, onClose }: EmergencyDialogProps) => {
     };
 
     try {
-      
-      await axios.post("http://localhost:8000/surgeries", newSurgery, {
+      const apiUrl = import.meta.env.VITE_VM_HTTP_URL; // Get API URL from .env
+      await axios.post(`${apiUrl}/surgeries`, newSurgery, {
         headers: { "Content-Type": "application/json" },
       });
       console.log('result : ',newSurgery )

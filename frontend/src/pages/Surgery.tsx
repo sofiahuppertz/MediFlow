@@ -42,9 +42,11 @@ const Surgery = () => {
   const [complicationScore, setComplicationScore] = useState("");
   // Fetch complication prediction when component mounts
   const fetchComplicationPrediction = async (surgery) => {
+    
+      const apiUrl = import.meta.env.VITE_VM_HTTP_URL; // Get API URL from .env
+    // const response = await axios.get(apiBaseUrl);
     try {
-      const response = await axios.get("http://localhost:8000/complication_prediction");
-      console.log("response:", response);
+      const response = await axios.get(`${apiUrl}/complication_prediction`);
       console.log("Prediction response:", response.data);
       setComplicationScore(response.data);
 

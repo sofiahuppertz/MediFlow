@@ -21,7 +21,9 @@ const Timesheet = () => {
   const socketRef = useRef<WebSocket | null>(null);
 
   useEffect(() => {
-    socketRef.current = new WebSocket("ws://localhost:8000/ws");
+    const vmurl = import.meta.env.VITE_VM_URL; // Get API URL from .env
+
+    socketRef.current = new WebSocket(`ws://${vmurl}:8000/ws`);
     const socket = socketRef.current;
 
     socket.onopen = () => {
@@ -85,7 +87,9 @@ const Timesheet = () => {
   const currentOffset: number = 300;
 
   useEffect(() => {
-    axios.get("http://localhost:8000/surgeries")
+    const apiUrl = import.meta.env.VITE_VM_HTTP_URL; // Get API URL from .env
+      
+    axios.get(`${apiUrl}/surgeries`)
       .then((response) => setSurgeries(response.data))
       .catch((error) => console.error("Error fetching surgeries:", error));
   }, []);

@@ -87,7 +87,8 @@ const PatientPage = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get("http://localhost:8000/get_patient_data");
+        const apiUrl = import.meta.env.VITE_VM_HTTP_URL; // Get API URL from .env
+        const response = await axios.get(`${apiUrl}/get_patient_data`);
         setPatientData(response.data);
       } catch (error) {
         console.error("Error fetching patient data:", error);
@@ -98,7 +99,9 @@ const PatientPage = () => {
   }, []);
 
   useEffect(() => {
-    socketRef.current = new WebSocket("ws://localhost:8000/ws");
+    const vmurl = import.meta.env.VITE_VM_URL; // Get API URL from .env
+
+    socketRef.current = new WebSocket(`ws://${vmurl}:8000/ws`);
     const socket = socketRef.current;
 
     socket.onopen = () => {

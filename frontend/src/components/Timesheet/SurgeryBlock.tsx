@@ -56,7 +56,8 @@ const SurgeryBlock = ({ surgery, scheduleStart, hourHeight, currentOffset, socke
   
   const updateSurgeries = async (newSurgery: Surgery) => {
     try {
-      const response = await axios.post("http://localhost:8000/surgeries", newSurgery, {
+      const apiUrl = import.meta.env.VITE_VM_HTTP_URL; // Get API URL from .env
+      const response = await axios.post(`${apiUrl}/surgeries`, newSurgery, {
         headers: { "Content-Type": "application/json" },
       });
       console.log("Response:", response.data);
