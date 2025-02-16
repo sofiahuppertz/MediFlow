@@ -43,15 +43,19 @@ async def get_patient_data():
         "age": 35,
         "contact": "(555) 123-4567",
         "email": "john.doe@example.com",
+        "medicaments":
+            [
+                {"name": "Pyridostigmine", "dose": "60mg", "frequency": "every 8 hours"},
+                {"name": "Prednisone", "dose": "5mg", "frequency": "every 12 hours"},
+            ],
         "surgery": {
             "type": "Appendectomy",
             "time": "2025-02-16T14:30:00",
             "status": "on-time",  # 'on-time', 'delayed', or 'cancelled'
         },
         "latestActions": [
-            {"id": 1, "action": "Pre-surgery consultation completed", "time": "2 hours ago"},
-            {"id": 2, "action": "Blood work results received", "time": "4 hours ago"},
-            {"id": 3, "action": "Medication schedule updated", "time": "1 day ago"}
+            {"id": 1, "action": "Remember not to take  Pyridostigmine", "time": "8 hours ago"},
+            {"id": 2, "action": "Pre-surgery consultation completed", "time": "2 days ago"},
         ]
     }
     return JSONResponse(content=patient_data)

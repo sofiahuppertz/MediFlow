@@ -19,7 +19,7 @@ const mockSurgeryData = {
       roomNumber: "OR-1",
     },
     surgeon: "Dr. Sarah Smith",
-    notes: "Standard procedure, no complications expected",
+    notes: "⚠️ Patient takes  Pyridostigmine (for myasthenia gravis). Pyridostigmine might make the Succinylcholine last longer, which could cause breathing problems.",
   },
 };
 
