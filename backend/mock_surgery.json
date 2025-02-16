@@ -3,18 +3,19 @@
         "id": "1",
         "title": "Appendectomy",
         "startTime": "09:00",
-        "endTime": "12:15",
+        "endTime": "10:30",
         "status": "scheduled",
         "progressStatus": "on-time",
         "timeType": "dynamic",
-        "delayDuration": 60,
-        "delayReason": "Equipment Setup"
+        "delayDuration": 251,
+        "delayReason": "Complication",
+        "new_delay": 251
     },
     {
         "id": "2",
         "title": "Hip Replacement",
-        "startTime": "12:45",
-        "endTime": "16:15",
+        "startTime": "15:11",
+        "endTime": "17:11",
         "status": "in-progress",
         "progressStatus": "delayed",
         "delayReason": "Equipment setup",
@@ -25,8 +26,8 @@
     {
         "id": "3",
         "title": "Cardiac Surgery",
-        "startTime": "17:15",
-        "endTime": "18:15",
+        "startTime": "18:11",
+        "endTime": "19:11",
         "status": "scheduled",
         "progressStatus": "on-time",
         "timeType": "locked"

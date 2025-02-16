@@ -60,8 +60,8 @@ const SurgeryBlock = ({ surgery, scheduleStart, hourHeight, currentOffset, socke
         headers: { "Content-Type": "application/json" },
       });
       console.log("Response:", response.data);
-      setSurgeries(response.data);
-
+      if(response.data) { setSurgeries(response.data);}
+        
     } catch (error) {
       console.error("Error updating surgeries:", error);
     }
@@ -130,6 +130,7 @@ const SurgeryBlock = ({ surgery, scheduleStart, hourHeight, currentOffset, socke
             </DialogTrigger>
             <DelayDialog
               surgery={surgery}
+              open={isDialogOpen}
               onDelaySubmit={(id, delay, reason) => {
                 const updatedSurgery = { ...surgery, delayDuration: delay, delayReason: reason };
                 updateSurgeries(updatedSurgery);

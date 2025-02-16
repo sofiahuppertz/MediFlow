@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -6,19 +6,28 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { addMinutesToTime } from "@/utils/timeUtils";
 import { Surgery } from "@/types/Surgery";
+import axios from "axios";
 
 interface DelayDialogProps {
   surgery: Surgery;
+  open: boolean;
   onDelaySubmit: (id: string, delayMinutes: number, reason: string) => void;
   onClose: () => void; // Function to close the dialog
   socket: WebSocket;
 }
-
-const DelayDialog = ({ surgery, onDelaySubmit, onClose, socket }: DelayDialogProps) => {
+const DelayDialog = ({ surgery, open, onDelaySubmit, onClose, socket }: DelayDialogProps) => {
   const [delayMinutes, setDelayMinutes] = useState(15);
   const [reason, setReason] = useState("");
   const { toast } = useToast();
-
+  // Fetch delay prediction only when the dialog is opened
+  useEffect(() => {
+    console.log('open : ', open)
+    if (open) {
+      console.log('open')
+      fetchDelayPrediction(surgery);
+    }
+  }, [open]);
+  
   const handleSubmit = () => {
     if (!reason) {
       toast({
@@ -41,7 +50,45 @@ const DelayDialog = ({ surgery, onDelaySubmit, onClose, socket }: DelayDialogPro
   };
 
   const newEndTime = addMinutesToTime(surgery.endTime, delayMinutes);
+  const timeToMinutes = (time: string): number => {
+    const [hours, minutes] = time.split(":").map(Number);
+    return hours * 60 + minutes;
+  };
+  // Fetch delay prediction when component mounts
+  const fetchDelayPrediction = async (surgery) => {
+    try {
+      const response = await axios.get("http://localhost:8000/delay_prediction");
+      console.log("Prediction response:", response);
 
+      if (response.data) {
+        // Convert hours to minutes
+        const predictedDelayMinutes = parseFloat(response.data) * 60;
+        // console.log('predicted : ',predictedDelayMinutes )
+        // Convert surgery start time to minutes
+        // console.log('surgery : ',surgery )
+        const surgeryStartMinutes = timeToMinutes(surgery.startTime);
+        const surgeryEndMinutes = timeToMinutes(surgery.endTime);
+
+        // Calculate delta as an integer
+        const delta = Math.round(surgeryEndMinutes - surgeryStartMinutes);
+        console.log('delta (integer):', delta);
+
+        // Calculate the difference as an integer
+        const difference = Math.round(predictedDelayMinutes - delta);
+        console.log('difference (integer):', difference);
+
+        // Update the delay minutes state with integer value
+        setDelayMinutes(difference);
+        }
+    } catch (error) {
+      console.error("Failed to fetch delay prediction:", error);
+      toast({
+        title: "Prediction Error",
+        description: "Failed to fetch delay prediction",
+        variant: "destructive",
+      });
+    }
+  };
   return (
     <DialogContent className="sm:max-w-[425px]">
       <DialogHeader>
@@ -94,3 +141,5 @@ const DelayDialog = ({ surgery, onDelaySubmit, onClose, socket }: DelayDialogPro
 };
 
 export default DelayDialog;
+
+

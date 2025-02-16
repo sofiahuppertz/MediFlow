@@ -11,6 +11,8 @@ from models import Medicament, Patient, Staff, Surgery, Timesheet
 from sqlmodel import Session, select
 from functions.inference_code import Inference
 import json
+from datetime import datetime, timedelta
+import os
 
 SessionDep = Annotated[Session, Depends(get_session)]
 SURGERIES_FILE = "mock_surgery.json"
@@ -67,6 +69,49 @@ def to_minutes(time_str):
     h, m = map(int, time_str.split(":"))
     return h * 60 + m
 
+from datetime import datetime, timedelta
+import json
+
+def consistency():
+    def adjust_schedule(operations):
+        fmt = "%H:%M"
+
+        # Sort operations by start time to handle unordered inputs
+        operations.sort(key=lambda x: datetime.strptime(x['startTime'], fmt))
+
+        for i in range(len(operations) - 1):
+            current_end = datetime.strptime(operations[i]['endTime'], fmt)
+            if 'delayDuration' in operations[i]:
+                current_end += timedelta(minutes=operations[i]['delayDuration'])
+            next_start = datetime.strptime(operations[i + 1]['startTime'], fmt)
+
+            # Check if the next operation starts before the current one ends
+            if current_end >= next_start:
+                # Shift the next operation by 10 minutes
+                new_start = current_end + timedelta(minutes=10)
+                duration = datetime.strptime(operations[i + 1]['endTime'], fmt) - datetime.strptime(operations[i + 1]['startTime'], fmt)
+                new_end = new_start + duration
+
+                # Update the next operation's start and end times
+                operations[i + 1]['startTime'] = new_start.strftime(fmt)
+                operations[i + 1]['endTime'] = new_end.strftime(fmt)
+
+            return operations
+
+
+    # Load operations from JSON file
+    with open('mock_surgery.json', 'r') as file:
+        operations = json.load(file)
+
+    # Adjust the schedule
+    adjusted_operations = adjust_schedule(operations)
+
+    # Save the updated operations back to the JSON file
+    with open('mock_surgery.json', 'w') as file:
+        json.dump(adjusted_operations, file, indent=4)
+
+    print("Operations schedule updated successfully.")
+
 def save_surgeries(updated_surgery):
     surgeries = load_surgeries()
     
@@ -74,9 +119,19 @@ def save_surgeries(updated_surgery):
     updated = False
     for i, surgery in enumerate(surgeries):
         if surgery["id"] == updated_surgery["id"]:
+            # Sum the previous delay and the new delay (defaulting to 0 if not present)
+            existing_delay = surgery.get("delayDuration", 0)
+            new_delay = updated_surgery.get("delayDuration", 0)
+            updated_surgery["new_delay"] = new_delay
+            total_delay = existing_delay + new_delay
+
+            # Update the delayDuration in the new surgery with the total delay
+            updated_surgery["delayDuration"] = total_delay
+
             surgeries[i] = updated_surgery
             updated = True
             break
+
     if not updated:
         surgeries.append(updated_surgery)
 
@@ -88,18 +143,19 @@ def save_surgeries(updated_surgery):
     for surgery in surgeries:
         # Apply previous cumulative delay to this surgery
         if cumulative_delay > 0:
+            print(cumulative_delay)
+            print(surgery["title"])
             surgery["startTime"] = add_minutes(surgery["startTime"], cumulative_delay)
             surgery["endTime"] = add_minutes(surgery["endTime"], cumulative_delay)
+
         
         # Add this surgery's delay to the cumulative delay
-        if surgery.get("delayDuration", 0) > 0:
-            surgery["endTime"] = add_minutes(surgery["endTime"], surgery["delayDuration"])
-            cumulative_delay += surgery["delayDuration"]
+        if surgery.get("new_delay", 0) > 0:
+            cumulative_delay += surgery["new_delay"]
 
     with open(SURGERIES_FILE, "w") as file:
         json.dump(surgeries, file, indent=4)
     return surgeries
-
 
 @app.post("/surgeries")
 def update_surgery(surgery: dict):
