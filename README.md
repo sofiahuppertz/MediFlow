@@ -112,7 +112,7 @@ npm run dev
    - Automatic risk scoring
    - Delay prediction alerts
 
-[Watch a live interaction](./public/live_delay.mp4)
+[Watch a live interaction](https://youtu.be/rkofe1Z-Ptg)
 
 ## ⚙️ System Architecture
 ```mermaid
